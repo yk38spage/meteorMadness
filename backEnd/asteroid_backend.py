@@ -1,3 +1,6 @@
+import math
+import time
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -18,8 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# NASA_API_KEY = os.getenv("uIHWZOg9PWP25PlpgspRfbGOqOmdUchgeTXGa1Va", "uIHWZOg9PWP25PlpgspRfbGOqOmdUchgeTXGa1Va")
-NASA_API_KEY = os.getenv("uIHWZOg9PWP25PlpgspRfbGOqOmdUchgeTXGa1Va", "NO_KEY")
+NASA_API_KEY = os.getenv("uIHWZOg9PWP25PlpgspRfbGOqOmdUchgeTXGa1Va", "DEMO_KEY")
 NASA_BASE_URL = "https://api.nasa.gov/neo/rest/v1"
 
 # Request/Response modelleri
@@ -86,158 +88,158 @@ async def get_asteroids():
         # API başarısız olursa fallback data
         return {
             "count": 5,
-                "asteroids": [
-                    {
-                        "id": "2418198",
-                        "name": "418198 2008 CN70",
-                        "diameter_km": 0.968,
-                        "diameter_min_km": 0.433,
-                        "velocity_km_s": 17.95,
-                        "miss_distance_km": 45709342.0,
-                        "close_approach_date": "2025-09-29",
-                        "is_potentially_hazardous": False
-                    },
-                    {
-                        "id": "2152664",
-                        "name": "152664 1998 FW4",
-                        "diameter_km": 0.689,
-                        "diameter_min_km": 0.308,
-                        "velocity_km_s": 18.61,
-                        "miss_distance_km": 3852719.0,
-                        "close_approach_date": "2025-09-29",
-                        "is_potentially_hazardous": True
-                    },
-                    {
-                        "id": "3002856",
-                        "name": "1991 GO",
-                        "diameter_km": 0.568,
-                        "diameter_min_km": 0.254,
-                        "velocity_km_s": 32.3,
-                        "miss_distance_km": 70011872.0,
-                        "close_approach_date": "2025-10-01",
-                        "is_potentially_hazardous": True
-                    },
-                    {
-                        "id": "3789115",
-                        "name": "2017 VV1",
-                        "diameter_km": 0.54,
-                        "diameter_min_km": 0.241,
-                        "velocity_km_s": 21.51,
-                        "miss_distance_km": 29445959.0,
-                        "close_approach_date": "2025-09-30",
-                        "is_potentially_hazardous": False
-                    },
-                    {
-                        "id": "3557843",
-                        "name": "2011 DV",
-                        "diameter_km": 0.413,
-                        "diameter_min_km": 0.185,
-                        "velocity_km_s": 6.11,
-                        "miss_distance_km": 22164403.0,
-                        "close_approach_date": "2025-09-28",
-                        "is_potentially_hazardous": True
-                    },
-                    {
-                        "id": "3346460",
-                        "name": "2006 SS134",
-                        "diameter_km": 0.301,
-                        "diameter_min_km": 0.134,
-                        "velocity_km_s": 18.97,
-                        "miss_distance_km": 12154759.0,
-                        "close_approach_date": "2025-10-01",
-                        "is_potentially_hazardous": True
-                    },
-                    {
-                        "id": "3427459",
-                        "name": "2008 SS",
-                        "diameter_km": 0.218,
-                        "diameter_min_km": 0.097,
-                        "velocity_km_s": 14.53,
-                        "miss_distance_km": 17860589.0,
-                        "close_approach_date": "2025-10-03",
-                        "is_potentially_hazardous": False
-                    },
-                    {
-                        "id": "3781988",
-                        "name": "2017 SJ20",
-                        "diameter_km": 0.202,
-                        "diameter_min_km": 0.09,
-                        "velocity_km_s": 26.13,
-                        "miss_distance_km": 56731410.0,
-                        "close_approach_date": "2025-10-02",
-                        "is_potentially_hazardous": False
-                    },
-                    {
-                        "id": "3716631",
-                        "name": "2015 HN9",
-                        "diameter_km": 0.179,
-                        "diameter_min_km": 0.08,
-                        "velocity_km_s": 7.71,
-                        "miss_distance_km": 12307670.0,
-                        "close_approach_date": "2025-10-03",
-                        "is_potentially_hazardous": False
-                    },
-                    {
-                        "id": "3648537",
-                        "name": "2013 ST19",
-                        "diameter_km": 0.177,
-                        "diameter_min_km": 0.079,
-                        "velocity_km_s": 11.97,
-                        "miss_distance_km": 18915604.0,
-                        "close_approach_date": "2025-09-28",
-                        "is_potentially_hazardous": False
-                    },
-                    {
-                        "id": "3449749",
-                        "name": "2009 DO111",
-                        "diameter_km": 0.16,
-                        "diameter_min_km": 0.072,
-                        "velocity_km_s": 5.47,
-                        "miss_distance_km": 18849694.0,
-                        "close_approach_date": "2025-09-27",
-                        "is_potentially_hazardous": False
-                    },
-                    {
-                        "id": "3782063",
-                        "name": "2017 TG1",
-                        "diameter_km": 0.156,
-                        "diameter_min_km": 0.07,
-                        "velocity_km_s": 15.08,
-                        "miss_distance_km": 44783877.0,
-                        "close_approach_date": "2025-10-02",
-                        "is_potentially_hazardous": False
-                    },
-                    {
-                        "id": "3728859",
-                        "name": "2015 SZ16",
-                        "diameter_km": 0.156,
-                        "diameter_min_km": 0.07,
-                        "velocity_km_s": 11.02,
-                        "miss_distance_km": 58516117.0,
-                        "close_approach_date": "2025-10-04",
-                        "is_potentially_hazardous": False
-                    },
-                    {
-                        "id": "3137735",
-                        "name": "2002 TX59",
-                        "diameter_km": 0.099,
-                        "diameter_min_km": 0.044,
-                        "velocity_km_s": 13.45,
-                        "miss_distance_km": 49723080.0,
-                        "close_approach_date": "2025-09-27",
-                        "is_potentially_hazardous": False
-                    },
-                    {
-                        "id": "3137864",
-                        "name": "2002 TS69",
-                        "diameter_km": 0.078,
-                        "diameter_min_km": 0.035,
-                        "velocity_km_s": 9.7,
-                        "miss_distance_km": 40253357.0,
-                        "close_approach_date": "2025-09-27",
-                        "is_potentially_hazardous": False
-                    }
-                ]
+            "asteroids": [
+                {
+                    "id": "2418198",
+                    "name": "418198 2008 CN70",
+                    "diameter_km": 0.968,
+                    "diameter_min_km": 0.433,
+                    "velocity_km_s": 17.95,
+                    "miss_distance_km": 45709342.0,
+                    "close_approach_date": "2025-09-29",
+                    "is_potentially_hazardous": False
+                },
+                {
+                    "id": "2152664",
+                    "name": "152664 1998 FW4",
+                    "diameter_km": 0.689,
+                    "diameter_min_km": 0.308,
+                    "velocity_km_s": 18.61,
+                    "miss_distance_km": 3852719.0,
+                    "close_approach_date": "2025-09-29",
+                    "is_potentially_hazardous": True
+                },
+                {
+                    "id": "3002856",
+                    "name": "1991 GO",
+                    "diameter_km": 0.568,
+                    "diameter_min_km": 0.254,
+                    "velocity_km_s": 32.3,
+                    "miss_distance_km": 70011872.0,
+                    "close_approach_date": "2025-10-01",
+                    "is_potentially_hazardous": True
+                },
+                {
+                    "id": "3789115",
+                    "name": "2017 VV1",
+                    "diameter_km": 0.54,
+                    "diameter_min_km": 0.241,
+                    "velocity_km_s": 21.51,
+                    "miss_distance_km": 29445959.0,
+                    "close_approach_date": "2025-09-30",
+                    "is_potentially_hazardous": False
+                },
+                {
+                    "id": "3557843",
+                    "name": "2011 DV",
+                    "diameter_km": 0.413,
+                    "diameter_min_km": 0.185,
+                    "velocity_km_s": 6.11,
+                    "miss_distance_km": 22164403.0,
+                    "close_approach_date": "2025-09-28",
+                    "is_potentially_hazardous": True
+                },
+                {
+                    "id": "3346460",
+                    "name": "2006 SS134",
+                    "diameter_km": 0.301,
+                    "diameter_min_km": 0.134,
+                    "velocity_km_s": 18.97,
+                    "miss_distance_km": 12154759.0,
+                    "close_approach_date": "2025-10-01",
+                    "is_potentially_hazardous": True
+                },
+                {
+                    "id": "3427459",
+                    "name": "2008 SS",
+                    "diameter_km": 0.218,
+                    "diameter_min_km": 0.097,
+                    "velocity_km_s": 14.53,
+                    "miss_distance_km": 17860589.0,
+                    "close_approach_date": "2025-10-03",
+                    "is_potentially_hazardous": False
+                },
+                {
+                    "id": "3781988",
+                    "name": "2017 SJ20",
+                    "diameter_km": 0.202,
+                    "diameter_min_km": 0.09,
+                    "velocity_km_s": 26.13,
+                    "miss_distance_km": 56731410.0,
+                    "close_approach_date": "2025-10-02",
+                    "is_potentially_hazardous": False
+                },
+                {
+                    "id": "3716631",
+                    "name": "2015 HN9",
+                    "diameter_km": 0.179,
+                    "diameter_min_km": 0.08,
+                    "velocity_km_s": 7.71,
+                    "miss_distance_km": 12307670.0,
+                    "close_approach_date": "2025-10-03",
+                    "is_potentially_hazardous": False
+                },
+                {
+                    "id": "3648537",
+                    "name": "2013 ST19",
+                    "diameter_km": 0.177,
+                    "diameter_min_km": 0.079,
+                    "velocity_km_s": 11.97,
+                    "miss_distance_km": 18915604.0,
+                    "close_approach_date": "2025-09-28",
+                    "is_potentially_hazardous": False
+                },
+                {
+                    "id": "3449749",
+                    "name": "2009 DO111",
+                    "diameter_km": 0.16,
+                    "diameter_min_km": 0.072,
+                    "velocity_km_s": 5.47,
+                    "miss_distance_km": 18849694.0,
+                    "close_approach_date": "2025-09-27",
+                    "is_potentially_hazardous": False
+                },
+                {
+                    "id": "3782063",
+                    "name": "2017 TG1",
+                    "diameter_km": 0.156,
+                    "diameter_min_km": 0.07,
+                    "velocity_km_s": 15.08,
+                    "miss_distance_km": 44783877.0,
+                    "close_approach_date": "2025-10-02",
+                    "is_potentially_hazardous": False
+                },
+                {
+                    "id": "3728859",
+                    "name": "2015 SZ16",
+                    "diameter_km": 0.156,
+                    "diameter_min_km": 0.07,
+                    "velocity_km_s": 11.02,
+                    "miss_distance_km": 58516117.0,
+                    "close_approach_date": "2025-10-04",
+                    "is_potentially_hazardous": False
+                },
+                {
+                    "id": "3137735",
+                    "name": "2002 TX59",
+                    "diameter_km": 0.099,
+                    "diameter_min_km": 0.044,
+                    "velocity_km_s": 13.45,
+                    "miss_distance_km": 49723080.0,
+                    "close_approach_date": "2025-09-27",
+                    "is_potentially_hazardous": False
+                },
+                {
+                    "id": "3137864",
+                    "name": "2002 TS69",
+                    "diameter_km": 0.078,
+                    "diameter_min_km": 0.035,
+                    "velocity_km_s": 9.7,
+                    "miss_distance_km": 40253357.0,
+                    "close_approach_date": "2025-09-27",
+                    "is_potentially_hazardous": False
+                }
+            ]
         }
 
 @app.post("/api/simulate")

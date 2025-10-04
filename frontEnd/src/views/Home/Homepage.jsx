@@ -11,11 +11,14 @@ const Homepage = () => {
     const [asteroids, setAsteroids] = useState([]);
     const [params, setParams] = useState({
         diameter_km: 0.5,
-        velocity_km_s: 20,
-        angle: 45,
+        horizontal_velocity_km_s: 20,
+        vertical_velocity_km_s: 20,
+        z_velocity_km_s: 20,
+        distance: 150000,
         latitude: 40.7,
         longitude: -74,
-        density_kg_m3: 3000
+        density_kg_m3: 3000,
+        simulation_speed: 50
     });
     const [results, setResults] = useState(null);
     const [mitigationResults, setMitigationResults] = useState(null);
@@ -53,11 +56,6 @@ const Homepage = () => {
         try {
             const data = await simulateImpact(params);
             setResults(data);
-
-            // Small delay for dramatic effect
-            setTimeout(() => {
-                setShowAsteroid(false);
-            }, 1000);
         } catch (error) {
             console.error('Simulation failed:', error);
             alert('Simulation failed. Please try again.');
@@ -104,16 +102,15 @@ const Homepage = () => {
                     loading={loading}
                 />
             </div>
-
             {/* Center Panel - 3D Visualization */}
             <div className="flex-1 relative">
                 <EarthScene
                     impactPoint={results?.impact_location}
                     blastRadius={results?.damage_zones.blast_radius_km}
                     showAsteroid={showAsteroid}
-                    impactAngle={params.angle}
-                    velocity_km_s={params.velocity_km_s}  // Add this line
-                    diameter_km={params.diameter_km}
+                    params={params}
+                    targetLocation={{ latitude: params.latitude, longitude: params.longitude }}
+                    onImpact={() => setShowAsteroid(false)}
                 />
 
                 {/* Loading Overlay */}

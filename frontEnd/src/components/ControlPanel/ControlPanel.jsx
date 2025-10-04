@@ -81,7 +81,7 @@ export default function ControlPanel({
                     <input
                         type="range"
                         min="0.01"
-                        max="10"
+                        max="1000"
                         step="0.01"
                         value={params.diameter_km}
                         onChange={(e) => setParams({ ...params, diameter_km: parseFloat(e.target.value) })}
@@ -113,8 +113,81 @@ export default function ControlPanel({
                     </div>
                 </div>
 
-                {/* Impact Angle */}
                 <div>
+                    <label className="text-xs text-gray-400 mb-1 block">
+                        Horizontal Velocity: {params.horizontal_velocity_km_s} km/s
+                    </label>
+                    <input
+                        type="range"
+                        min="-120"
+                        max="120"
+                        step="0.1"
+                        value={params.horizontal_velocity_km_s}
+                        onChange={(e) => setParams({ ...params, horizontal_velocity_km_s: parseFloat(e.target.value) })}
+                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>120 km/s west</span>
+                        <span>120 km/s east</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label className="text-xs text-gray-400 mb-1 block">
+                        Vertical Velocity: {params.vertical_velocity_km_s} km/s
+                    </label>
+                    <input
+                        type="range"
+                        min="-120"
+                        max="120"
+                        step="0.1"
+                        value={params.vertical_velocity_km_s}
+                        onChange={(e) => setParams({ ...params, vertical_velocity_km_s: parseFloat(e.target.value) })}
+                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>120 km/s south</span>
+                        <span>120 km/s north</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label className="text-xs text-gray-400 mb-1 block">
+                        Depth Velocity: {params.z_velocity_km_s} km/s
+                    </label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="120"
+                        step="0.1"
+                        value={params.z_velocity_km_s}
+                        onChange={(e) => setParams({ ...params, z_velocity_km_s: parseFloat(e.target.value) })}
+                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>0 km/s to surface</span>
+                        <span>120 km/s to surface</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label className="text-xs text-gray-400 mb-1 block">
+                        Distance from the Earth (x1,000 km):
+                    </label>
+                    <input
+                        type="number"
+                        min="1"
+                        max="1000000000"
+                        step="1"
+                        value={params.distance}
+                        onChange={(e) => setParams({ ...params, distance: parseFloat(e.target.value) })}
+                        className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-orange-500"
+                    />
+                </div>
+
+
+                {/* Impact Angle */}
+                {/* <div>
                     <label className="text-xs text-gray-400 mb-1 block">
                         Impact Angle: {params.angle}°
                     </label>
@@ -131,14 +204,15 @@ export default function ControlPanel({
                         <span>15° (shallow)</span>
                         <span>90° (vertical)</span>
                     </div>
-                </div>
+                </div> */}
             </div>
 
-            {/* Impact Location */}
+            {/* Starting Location */}
             <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-300">
                     <i className="fa-solid fa-location-dot"></i>
-                    Impact Location
+                    {/* Impact Location */}
+                    Starting Location
                 </label>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -194,6 +268,26 @@ export default function ControlPanel({
                     >
                         Ocean
                     </button>
+                </div>
+            </div>
+
+            <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-300">
+                    <i className="fa-solid fa-gauge"></i>
+                    Simulation Speed
+                </label>
+                <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    
+                    value={params.simulation_speed}
+                    onChange={(e) => setParams({ ...params, simulation_speed: parseFloat(e.target.value) })}
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>0 km/s to surface</span>
+                    <span>120 km/s to surface</span>
                 </div>
             </div>
 

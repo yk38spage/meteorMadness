@@ -1,9 +1,9 @@
-import { Canvas, useLoader } from '@react-three/fiber';
-import { OrbitControls, Sphere, Html, Line } from '@react-three/drei';
-import { useRef, useMemo } from 'react';
+import { Canvas, useLoader, useFrame } from '@react-three/fiber';
+import { OrbitControls, Sphere, Html } from '@react-three/drei';
+import { useRef, useMemo, useEffect } from 'react';
 import * as THREE from 'three';
 
-function Earth({ impactPoint, blastRadius, impactAngle, velocity_km_s }) {  // Add velocity_km_s prop
+function Earth({ impactPoint, blastRadius }) {
     const earthRef = useRef();
 
     // Load Earth textures
@@ -18,6 +18,7 @@ function Earth({ impactPoint, blastRadius, impactAngle, velocity_km_s }) {  // A
     // Convert lat/lon to 3D coordinates on sphere
     const impactPosition = useMemo(() => {
         if (!impactPoint) return null;
+
         const { latitude, longitude } = impactPoint;
         const radius = 1.3;
         const phi = (90 - latitude) * (Math.PI / 180);
@@ -27,68 +28,8 @@ function Earth({ impactPoint, blastRadius, impactAngle, velocity_km_s }) {  // A
         const z = radius * Math.sin(phi) * Math.sin(theta);
         const y = radius * Math.cos(phi);
 
-        return new THREE.Vector3(x, y, z);
+        return [x, y, z];
     }, [impactPoint]);
-
-    // Keplerian hyperbolic trajectory points (rewritten section)
-    const trajectoryPoints = useMemo(() => {
-        if (!impactPosition || impactAngle === undefined || velocity_km_s === undefined) return null;
-
-        const R = 1.3;  // Earth radius in model units
-        const GM = 0.3;  // Gravitational parameter (tuned for visible curve)
-        const v_model = velocity_km_s / 20.0;  // Normalize to ~1 at 20 km/s
-        const stepSize = 0.005;  // Integration step (smaller = smoother/more accurate)
-        const maxDist = 10;  // Max distance from center to trace
-        const maxSteps = 200;  // Prevent infinite loop
-
-        // Surface normal (outward radial)
-        const normal = impactPosition.clone().normalize();
-
-        // Tangent direction (eastward approximation)
-        const tangent = new THREE.Vector3().crossVectors(normal, new THREE.Vector3(0, 1, 0));
-        if (tangent.length() < 1e-6) {
-            tangent.set(1, 0, 0);
-        }
-        tangent.normalize();
-
-        // Incoming direction at impact: rotate normal toward tangent by (90 - angle)
-        const angleRad = (90 - impactAngle) * (Math.PI / 180);
-        const outwardDirection = normal.clone().applyAxisAngle(tangent, angleRad);
-        const incomingDirection = outwardDirection.clone().negate().normalize();
-
-        // Velocity vector at impact (incoming)
-        const velocity = incomingDirection.clone().multiplyScalar(v_model);
-
-        // Numerical integration backward in time (Euler method)
-        const points = [];
-        let pos = impactPosition.clone();
-        let vel = velocity.clone();
-        points.push(pos.clone());
-
-        let steps = 0;
-        const dt = -stepSize;  // Negative for backward time
-
-        while (steps < maxSteps) {
-            const r = pos.length();
-            if (r > maxDist) break;
-
-            // Gravitational acceleration (inward)
-            const rHat = pos.clone().normalize();
-            const accelMag = GM / (r * r);
-            const accel = rHat.clone().multiplyScalar(-accelMag);
-
-            // Euler update: backward in time
-            vel.add(accel.clone().multiplyScalar(dt));
-            pos.add(vel.clone().multiplyScalar(dt));
-
-            points.push(pos.clone());
-            steps++;
-        }
-
-        // Reverse points to go from far away -> impact (for visual flow, though Line doesn't care about order)
-        points.reverse();
-        return points;
-    }, [impactPosition, impactAngle, velocity_km_s]);
 
     return (
         <>
@@ -119,7 +60,6 @@ function Earth({ impactPoint, blastRadius, impactAngle, velocity_km_s }) {  // A
             {/* Impact marker */}
             {impactPosition && (
                 <>
-                    {/* Marker */}
                     <Sphere position={impactPosition} args={[0.03, 16, 16]}>
                         <meshBasicMaterial color="#ff0000" />
                     </Sphere>
@@ -135,15 +75,6 @@ function Earth({ impactPoint, blastRadius, impactAngle, velocity_km_s }) {  // A
                                 side={THREE.DoubleSide}
                             />
                         </mesh>
-                    )}
-
-                    {/* Curved Keplerian trajectory line */}
-                    {trajectoryPoints && trajectoryPoints.length > 1 && (
-                        <Line
-                            points={trajectoryPoints}
-                            color="yellow"
-                            lineWidth={2}
-                        />
                     )}
 
                     <Html position={impactPosition} distanceFactor={2}>
@@ -196,44 +127,137 @@ function Moon() {
 }
 
 function Sun() {
-    const sunTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Sun/8k_sun.jpg');
-    // Sun position - placed to create day/night effect
+    const sunTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Sun/8k_sun.jpg'); // Sun position - placed to create day/night effect
     const sunDistance = 15;
-
     return (
-        <>
-            <Sphere position={[sunDistance, 2, 0]} args={[2, 32, 32]}>
-                <meshStandardMaterial
-                    map={sunTexture}
-                    color="white" // don’t tint over the texture
-                    emissive="white"
-                    emissiveMap={sunTexture} // makes the texture itself emit light
-                    emissiveIntensity={1.5}
-                />
-            </Sphere>
-
-            {/* Lens flare effect */}
-            <pointLight
-                position={[sunDistance, 2, 0]}
-                intensity={2.5}
-                color="#ffffff"
-                distance={50}
+        <Sphere position={[sunDistance, 2, 0]} args={[2, 32, 32]}>
+            <meshStandardMaterial
+                map={sunTexture}
+                color="white" // don’t tint over the texture
+                emissive="white"
+                emissiveMap={sunTexture} // makes the texture itself emit light
+                emissiveIntensity={1.5}
             />
-        </>
-    );
-}
-
-function AsteroidApproach({ show, diameter_km }) {
-    if (!show) return null;
-
-    return (
-        <Sphere position={[2, 0.5, 2]} args={[0.05 * diameter_km, 16, 16]}>
-            <meshStandardMaterial color="#888888" roughness={0.9} />
         </Sphere>
     );
 }
 
-export default function EarthScene({ impactPoint, blastRadius, showAsteroid, impactAngle, velocity_km_s }) {  // Add velocity_km_s prop
+function AsteroidApproach({ show, params, targetLocation, onImpact }) {
+    const asteroidRef = useRef();
+    const rEarth = 1.3;
+
+    const targetPosition = useMemo(() => {
+        if (!targetLocation) return null;
+
+        const { latitude, longitude } = targetLocation;
+        const radius = rEarth;
+        const phi = (90 - latitude) * (Math.PI / 180);
+        const theta = (longitude + 180) * (Math.PI / 180);
+
+        const x = -(radius * Math.sin(phi) * Math.cos(theta));
+        const z = radius * Math.sin(phi) * Math.sin(theta);
+        const y = radius * Math.cos(phi);
+
+        return new THREE.Vector3(x, y, z);
+    }, [targetLocation]);
+
+    const modelVel = useMemo(() => {
+        if (!targetPosition || !show) return null;
+
+        const phi = (90 - targetLocation.latitude) * (Math.PI / 180);
+        const theta = (targetLocation.longitude + 180) * (Math.PI / 180);
+
+        const radialUnit = targetPosition.clone().normalize();
+        const unitEast = new THREE.Vector3(Math.sin(theta), 0, Math.cos(theta));
+        const unitNorth = new THREE.Vector3(
+            Math.cos(phi) * Math.cos(theta),
+            Math.sin(phi),
+            -Math.cos(phi) * Math.sin(theta)
+        );
+
+        const velVector = new THREE.Vector3();
+        velVector.addScaledVector(unitEast, params.horizontal_velocity_km_s);
+        velVector.addScaledVector(unitNorth, params.vertical_velocity_km_s);
+        velVector.addScaledVector(radialUnit, -params.z_velocity_km_s); // inward
+
+        const speed = velVector.length();
+        if (speed === 0) return null;
+
+        const direction = velVector.clone().normalize();
+
+        const scale = rEarth / 6371; // units per km
+        const realDistanceKm = params.distance * 1000;
+        let modelDistance = realDistanceKm * scale;
+        const maxModelDistance = 20; // Cap to prevent invisibly far starts
+        modelDistance = Math.min(modelDistance, maxModelDistance);
+
+        // Animation time (in seconds) - adjusted by simulation_speed
+        const baseTime = 5; // base 5 seconds at simulation_speed=50
+        const animationTime = params.simulation_speed > 0 ? baseTime * (50 / params.simulation_speed) : Infinity;
+
+        const velMag = modelDistance / animationTime;
+
+        return direction.multiplyScalar(velMag);
+    }, [show, params, targetLocation]);
+
+    const initialPosition = useMemo(() => {
+        if (!targetPosition || !modelVel) return new THREE.Vector3(2, 0.5, 2);
+
+        const direction = modelVel.clone().normalize();
+        const scale = rEarth / 6371;
+        const realDistanceKm = params.distance * 1000;
+        let modelDistance = realDistanceKm * scale;
+        const maxModelDistance = 20;
+        modelDistance = Math.min(modelDistance, maxModelDistance);
+
+        return targetPosition.clone().sub(direction.clone().multiplyScalar(modelDistance));
+    }, [modelVel, targetPosition, params]);
+
+    useEffect(() => {
+        if (show && asteroidRef.current) {
+            asteroidRef.current.position.copy(initialPosition);
+        }
+    }, [show, initialPosition]);
+
+    useFrame((state, delta) => {
+        if (show && asteroidRef.current && modelVel && params.simulation_speed > 0) {
+            asteroidRef.current.position.add(modelVel.clone().multiplyScalar(delta));
+
+            // Check for impact
+            if (asteroidRef.current.position.length() < rEarth + 0.1) {
+                onImpact();
+            }
+        }
+    });
+
+    // Enhanced size scaling: minimum size for visibility, scales with diameter
+    const baseSize = 0.05; // Minimum size for small asteroids
+    const scaleFactor = 0.03; // Scaling per km for better visual range
+    const asteroidSize = Math.max(baseSize, params.diameter_km * scaleFactor);
+
+    if (!show) return null;
+
+    return (
+        <>
+            <Sphere ref={asteroidRef} args={[asteroidSize, 16, 16]} position={initialPosition}>
+                <meshStandardMaterial
+                    color="#888888"
+                    roughness={0.9}
+                    emissive="#ff5555" // Subtle red glow for visibility
+                    emissiveIntensity={0.3}
+                />
+            </Sphere>
+            {/* Optional label for the asteroid */}
+            <Html position={initialPosition} distanceFactor={2}>
+                <div className="bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
+                    Asteroid ({params.diameter_km} km)
+                </div>
+            </Html>
+        </>
+    );
+}
+
+export default function EarthScene({ impactPoint, blastRadius, showAsteroid, params, targetLocation, onImpact }) {
     return (
         <div className="w-full h-full bg-black">
             <Canvas camera={{ position: [0, 0, 4], fov: 50 }}>
@@ -254,25 +278,20 @@ export default function EarthScene({ impactPoint, blastRadius, showAsteroid, imp
                 <Sun />
 
                 {/* Earth and impact */}
-                <Earth
-                    impactPoint={impactPoint}
-                    blastRadius={blastRadius}
-                    impactAngle={impactAngle}
-                    velocity_km_s={velocity_km_s}  // Pass down
-                />
+                <Earth impactPoint={impactPoint} blastRadius={blastRadius} />
 
                 {/* Moon */}
                 <Moon />
 
                 {/* Asteroid */}
-                <AsteroidApproach show={showAsteroid} />
+                <AsteroidApproach show={showAsteroid} params={params} targetLocation={targetLocation} onImpact={onImpact} />
 
                 {/* Controls */}
                 <OrbitControls
                     enablePan={false}
                     minDistance={2}
-                    maxDistance={8}
-                    // autoRotate
+                    maxDistance={30} // Increased to allow viewing farther asteroids
+                    autoRotate
                     autoRotateSpeed={0.3}
                 />
 
