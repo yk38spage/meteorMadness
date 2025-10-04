@@ -92,24 +92,37 @@ function Moon() {
     const moonTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Moon/8k_moon.jpg');
     
     // Moon orbits at a realistic distance (scaled down)
-    const moonDistance = 3.5;
+    const moonDistance = 4.5;
     const angle = Math.PI / 4; // 45 degrees
+    const yOffset = 0.3; // Moon's y-position offset
     
     return (
-        <Sphere 
-            position={[
-                moonDistance * Math.cos(angle),
-                0.3,
-                moonDistance * Math.sin(angle)
-            ]} 
-            args={[0.35, 32, 32]}
-        >
-            <meshStandardMaterial
-                map={moonTexture}
-                roughness={0.9}
-                metalness={0.0}
-            />
-        </Sphere>
+        <>
+            <Sphere 
+                position={[
+                    moonDistance * Math.cos(angle),
+                    yOffset,
+                    moonDistance * Math.sin(angle)
+                ]} 
+                args={[0.26, 32, 32]}
+            >
+                <meshStandardMaterial
+                    map={moonTexture}
+                    roughness={0.9}
+                    metalness={0.0}
+                />
+            </Sphere>
+            {/* Moon orbital path aligned with Moon's position */}
+            <mesh position={[0, yOffset, 0]} rotation={[Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[moonDistance - 0.05, moonDistance + 0.05, 64]} />
+                <meshBasicMaterial
+                    color="#555555"
+                    transparent
+                    opacity={0.3}
+                    side={THREE.DoubleSide}
+                />
+            </mesh>
+        </>
     );
 }
 
