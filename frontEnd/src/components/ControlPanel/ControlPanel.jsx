@@ -76,9 +76,9 @@ export default function ControlPanel({
                 {/* Diameter */}
                 <div>
                     <label className="text-xs text-gray-400 mb-1 block">
-                        Diameter: {params.diameter_km} km
+                        Diameter (km):
                     </label>
-                    <input
+                    {/* <input
                         type="range"
                         min="0.01"
                         max="1000"
@@ -86,10 +86,19 @@ export default function ControlPanel({
                         value={params.diameter_km}
                         onChange={(e) => setParams({ ...params, diameter_km: parseFloat(e.target.value) })}
                         className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                    /> */}
+                    <input
+                        type="number"
+                        min="0.01"
+                        max="1000"
+                        step="0.01"
+                        value={params.diameter_km}
+                        onChange={(e) => setParams({ ...params, diameter_km: parseFloat(e.target.value) })}
+                        className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-orange-500"
                     />
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
                         <span>0.01 km</span>
-                        <span>10 km</span>
+                        <span>1000 km</span>
                     </div>
                 </div>
 
@@ -177,7 +186,7 @@ export default function ControlPanel({
                     <input
                         type="number"
                         min="1"
-                        max="1000000000"
+                        max="1000000"
                         step="1"
                         value={params.distance}
                         onChange={(e) => setParams({ ...params, distance: parseFloat(e.target.value) })}

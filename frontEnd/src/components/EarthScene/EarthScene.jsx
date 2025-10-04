@@ -231,8 +231,8 @@ function AsteroidApproach({ show, params, targetLocation, onImpact }) {
     });
 
     // Enhanced size scaling: minimum size for visibility, scales with diameter
-    const baseSize = 0.05; // Minimum size for small asteroids
-    const scaleFactor = 0.03; // Scaling per km for better visual range
+    const baseSize = 0.0001; // Minimum size for small asteroids
+    const scaleFactor = 0.0001; // Scaling per km for better visual range
     const asteroidSize = Math.max(baseSize, params.diameter_km * scaleFactor);
 
     if (!show) return null;
