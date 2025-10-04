@@ -1,68 +1,187 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* :root {
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
 }
+
 a:hover {
-  color: #535bf2;
+    color: #535bf2;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+    margin: 0;
+    display: flex;
+    place-items: center;
+    min-width: 320px;
+    min-height: 100vh;
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+    font-size: 3.2em;
+    line-height: 1.1;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    cursor: pointer;
+    transition: border-color 0.25s;
 }
+
 button:hover {
-  border-color: #646cff;
+    border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+    outline: 4px auto -webkit-focus-ring-color;
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+    :root {
+        color: #213547;
+        background-color: #ffffff;
+    }
+
+    a:hover {
+        color: #747bff;
+    }
+
+    button {
+        background-color: #f9f9f9;
+    }
+} */
+
+@import "tailwindcss";
+
+
+:root {
+    --bg-dark: hsl(0, 0%, 0%);
+    --bg-normal: hsl(0, 0%, 5%);
+    --bg-light: hsl(0, 0%, 10%);
+    --text: hsl(0, 0%, 95%);
+    --text-muted: hsl(0, 0%, 70%);
+    --border: hsl(0, 0%, 30%);
+
+    --login-background: linear-gradient(120deg, hsl(209, 78%, 12%) 0%, hsl(190, 88%, 10%) 50%, hsl(35, 100%, 9%) 100%);
+}
+
+button,
+input[type="submit"],
+.icon,
+a,
+.user-card {
+    /* Default colors */
+    --btn-default: hsl(0, 0%, 20%);
+    --btn-default-text: hsl(0, 0%, 80%);
+    --btn-default-border: 2px solid hsl(0, 0%, 20%);
+
+    --btn-primary: hsl(210, 75%, 35%);
+    --btn-primary-text: hsl(0, 0%, 90%);
+    --btn-primary-border: 2px solid hsl(210, 80%, 40%);
+
+    /* --btn-recommended: hsl(134, 50%, 35%);
+    --btn-recommended-text: hsl(0, 0%, 95%);
+
+    --btn-warning: hsl(45, 100%, 45%);
+    --btn-warning-text: hsl(0, 0%, 95%);
+
+    --btn-important: hsl(354, 60%, 40%);
+    --btn-important-text: hsl(0, 0%, 95%); */
+
+    --btn-secondary: hsl(0, 0%, 15%);
+    --btn-secondary-text: hsl(0, 0%, 80%);
+    --btn-secondary-border: 2px solid hsl(0, 0%, 25%);
+
+    /* Button hover or active colors */
+    --btn-active-default: hsl(0, 0%, 25%);
+    --btn-active-default-text: hsl(0, 0%, 80%);
+    --btn-active-default-border: 2px solid hsl(0, 0%, 30%);
+    
+    --btn-active-primary: hsl(210, 75%, 45%);
+    --btn-active-primary-text: hsl(0, 0%, 90%);
+    --btn-active-primary-border: 2px solid hsl(210, 80%, 40%);
+
+    /* --btn-active-recommended: hsl(134, 50%, 30%);
+    --btn-active-recommended-text: hsl(0, 0%, 90%);
+
+    --btn-active-warning: hsl(45, 100%, 40%);
+    --btn-active-warning-text: hsl(0, 0%, 90%);
+
+    --btn-active-important: hsl(354, 60%, 35%);
+    --btn-active-important-text: hsl(0, 0%, 90%); */
+
+    --btn-active-secondary: hsl(0, 0%, 25%);
+    --btn-active-secondary-text: hsl(0, 0%, 80%);
+    --btn-active-secondary-border: 2px solid hsl(0, 0%, 30%);
+
+    --btn-circle-not-active-border: 2px solid transparent;
+
+    /* When button is disabled */
+    --btn-disabled-opacity: 0.5;
+
+    --link: hsl(211, 90%, 60%);
+    --link-hover: hsl(211, 90%, 55%);
+}
+
+.inline-notice,
+.notice-box,
+.upper-notice-box,
+.box-warning {
+    --notice-info: hsl(216, 80%, 40%);
+    --notice-info-text: hsl(0, 0%, 90%);
+
+    --notice-success: hsl(134, 61%, 40%);
+    --notice-success-text: hsl(0, 0%, 95%);
+
+    --notice-warning: hsl(27, 75%, 40%);
+    --notice-warning-text: hsl(0, 0%, 95%);
+
+    --notice-error: hsl(342, 86%, 40%);
+    --notice-error-text: hsl(0, 0%, 95%);
+}
+
+input,
+select,
+textarea,
+.radio-box-container {
+    --input-bg: hsl(0, 0%, 20%);
+    --input-chkbox-bg: hsl(0, 0%, 20%);
+    --input-chkbox-checked: hsl(216, 90%, 45%);
+    --input-text: hsl(0, 0%, 90%);
+    --input-highlight: hsl(0, 0%, 30%);
+    --input-border: hsl(0, 0%, 30%);
+    --input-border-highlight: hsl(0, 0%, 40%);
+    --input-autofill: hsl(200, 30%, 20%);
+}
+
+.modal-container {
+    --modal-bg: hsl(0, 0%, 5%);
+    --modal-text: hsl(0, 0%, 90%);
+}
+
+.status-text {
+    --status-text-success: hsl(135, 70%, 35%);
+    --status-text-warning: hsl(27, 100%, 50%);
+    --status-text-error: hsl(350, 50%, 60%);
 }
