@@ -48,7 +48,8 @@ export default function ControlPanel({
             {/* Asteroid Selector */}
             <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-300">
-                    <Rocket className="w-4 h-4" />
+                    {/* <Rocket className="w-4 h-4" /> */}
+                    <i className="fa-solid fa-meteor"></i>
                     Select Asteroid
                 </label>
                 <select
@@ -68,7 +69,7 @@ export default function ControlPanel({
             {/* Parameters */}
             <div className="space-y-4">
                 <div className="flex items-center gap-2 text-sm font-semibold text-gray-300">
-                    <Settings className="w-4 h-4" />
+                    <i className="fa-solid fa-gear"></i>
                     Impact Parameters
                 </div>
 
@@ -136,7 +137,7 @@ export default function ControlPanel({
             {/* Impact Location */}
             <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-300">
-                    <MapPin className="w-4 h-4" />
+                    <i className="fa-solid fa-location-dot"></i>
                     Impact Location
                 </label>
 
@@ -202,7 +203,7 @@ export default function ControlPanel({
                 disabled={loading}
                 className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold py-3 rounded-lg transition-all transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg"
             >
-                {loading ? 'Simulating...' : '💥 Simulate Impact'}
+                {loading ? 'Simulating...' : <><i className="fa-solid fa-explosion"></i>Simulate Impact</>}
             </button>
 
             {/* Mitigation Section */}
@@ -250,7 +251,7 @@ export default function ControlPanel({
                             disabled={loading}
                             className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-700 text-white font-semibold py-2 rounded transition-all disabled:cursor-not-allowed"
                         >
-                            {loading ? 'Evaluating...' : '🛡️ Evaluate Defense'}
+                            {loading ? 'Evaluating...' : <><i className="fa-solid fa-shield-halved"></i>Evaluate Defense</>}
                         </button>
                     </div>
                 )}

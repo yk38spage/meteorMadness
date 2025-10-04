@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE = 'http://127.0.0.1:8000/api'; // Vite proxy kullanacağız
+// const API_BASE = 'http://127.0.0.1:8000/api'; // Vite proxy kullanacağız
+const API_BASE = 'http://10.130.0.30:8000/api'; // Vite proxy kullanacağız
 
 export const fetchAsteroids = async () => {
   try {
