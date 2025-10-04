@@ -3,7 +3,7 @@ import { OrbitControls, Sphere, Html, Line } from '@react-three/drei';
 import { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 
-function Earth({ impactPoint, blastRadius, impactAngle }) {
+function Earth({ impactPoint, blastRadius, impactAngle, velocity_km_s }) {  // Add velocity_km_s prop
     const earthRef = useRef();
 
     // Load Earth textures
@@ -30,34 +30,65 @@ function Earth({ impactPoint, blastRadius, impactAngle }) {
         return new THREE.Vector3(x, y, z);
     }, [impactPoint]);
 
-    // Entry trajectory line
+    // Keplerian hyperbolic trajectory points (rewritten section)
     const trajectoryPoints = useMemo(() => {
-        if (!impactPosition || !impactAngle) return null;
+        if (!impactPosition || impactAngle === undefined || velocity_km_s === undefined) return null;
 
-        // Surface normal (radial vector from Earth’s center)
+        const R = 1.3;  // Earth radius in model units
+        const GM = 0.3;  // Gravitational parameter (tuned for visible curve)
+        const v_model = velocity_km_s / 20.0;  // Normalize to ~1 at 20 km/s
+        const stepSize = 0.005;  // Integration step (smaller = smoother/more accurate)
+        const maxDist = 10;  // Max distance from center to trace
+        const maxSteps = 200;  // Prevent infinite loop
+
+        // Surface normal (outward radial)
         const normal = impactPosition.clone().normalize();
 
-        // Pick a tangent direction (eastward)
+        // Tangent direction (eastward approximation)
         const tangent = new THREE.Vector3().crossVectors(normal, new THREE.Vector3(0, 1, 0));
         if (tangent.length() < 1e-6) {
-            // If impact at poles, pick X axis
             tangent.set(1, 0, 0);
         }
         tangent.normalize();
 
-        // Rotate normal towards tangent by (90 - angle)
+        // Incoming direction at impact: rotate normal toward tangent by (90 - angle)
         const angleRad = (90 - impactAngle) * (Math.PI / 180);
-        const direction = normal.clone().applyAxisAngle(
-            tangent,
-            angleRad
-        );
+        const outwardDirection = normal.clone().applyAxisAngle(tangent, angleRad);
+        const incomingDirection = outwardDirection.clone().negate().normalize();
 
-        // Line extends outward from surface
-        const start = impactPosition.clone();
-        const end = impactPosition.clone().add(direction.multiplyScalar(5));
+        // Velocity vector at impact (incoming)
+        const velocity = incomingDirection.clone().multiplyScalar(v_model);
 
-        return [start, end];
-    }, [impactPosition, impactAngle]);
+        // Numerical integration backward in time (Euler method)
+        const points = [];
+        let pos = impactPosition.clone();
+        let vel = velocity.clone();
+        points.push(pos.clone());
+
+        let steps = 0;
+        const dt = -stepSize;  // Negative for backward time
+
+        while (steps < maxSteps) {
+            const r = pos.length();
+            if (r > maxDist) break;
+
+            // Gravitational acceleration (inward)
+            const rHat = pos.clone().normalize();
+            const accelMag = GM / (r * r);
+            const accel = rHat.clone().multiplyScalar(-accelMag);
+
+            // Euler update: backward in time
+            vel.add(accel.clone().multiplyScalar(dt));
+            pos.add(vel.clone().multiplyScalar(dt));
+
+            points.push(pos.clone());
+            steps++;
+        }
+
+        // Reverse points to go from far away -> impact (for visual flow, though Line doesn't care about order)
+        points.reverse();
+        return points;
+    }, [impactPosition, impactAngle, velocity_km_s]);
 
     return (
         <>
@@ -106,8 +137,8 @@ function Earth({ impactPoint, blastRadius, impactAngle }) {
                         </mesh>
                     )}
 
-                    {/* Angle trajectory line */}
-                    {trajectoryPoints && (
+                    {/* Curved Keplerian trajectory line */}
+                    {trajectoryPoints && trajectoryPoints.length > 1 && (
                         <Line
                             points={trajectoryPoints}
                             color="yellow"
@@ -192,17 +223,17 @@ function Sun() {
     );
 }
 
-function AsteroidApproach({ show }) {
+function AsteroidApproach({ show, diameter_km }) {
     if (!show) return null;
 
     return (
-        <Sphere position={[2, 0.5, 2]} args={[0.05, 16, 16]}>
+        <Sphere position={[2, 0.5, 2]} args={[0.05 * diameter_km, 16, 16]}>
             <meshStandardMaterial color="#888888" roughness={0.9} />
         </Sphere>
     );
 }
 
-export default function EarthScene({ impactPoint, blastRadius, showAsteroid, impactAngle }) {
+export default function EarthScene({ impactPoint, blastRadius, showAsteroid, impactAngle, velocity_km_s }) {  // Add velocity_km_s prop
     return (
         <div className="w-full h-full bg-black">
             <Canvas camera={{ position: [0, 0, 4], fov: 50 }}>
@@ -223,8 +254,12 @@ export default function EarthScene({ impactPoint, blastRadius, showAsteroid, imp
                 <Sun />
 
                 {/* Earth and impact */}
-                {/* pass impactAngle down */}
-                <Earth impactPoint={impactPoint} blastRadius={blastRadius} impactAngle={impactAngle} />
+                <Earth
+                    impactPoint={impactPoint}
+                    blastRadius={blastRadius}
+                    impactAngle={impactAngle}
+                    velocity_km_s={velocity_km_s}  // Pass down
+                />
 
                 {/* Moon */}
                 <Moon />

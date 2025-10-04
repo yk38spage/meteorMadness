@@ -112,6 +112,8 @@ const Homepage = () => {
                     blastRadius={results?.damage_zones.blast_radius_km}
                     showAsteroid={showAsteroid}
                     impactAngle={params.angle}
+                    velocity_km_s={params.velocity_km_s}  // Add this line
+                    diameter_km={params.diameter_km}
                 />
 
                 {/* Loading Overlay */}
