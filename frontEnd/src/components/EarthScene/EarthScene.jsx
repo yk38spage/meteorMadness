@@ -1,9 +1,9 @@
 import { Canvas, useLoader } from '@react-three/fiber';
-import { OrbitControls, Sphere, Html } from '@react-three/drei';
+import { OrbitControls, Sphere, Html, Line } from '@react-three/drei';
 import { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 
-function Earth({ impactPoint, blastRadius }) {
+function Earth({ impactPoint, blastRadius, impactAngle }) {
     const earthRef = useRef();
 
     // Load Earth textures
@@ -18,7 +18,6 @@ function Earth({ impactPoint, blastRadius }) {
     // Convert lat/lon to 3D coordinates on sphere
     const impactPosition = useMemo(() => {
         if (!impactPoint) return null;
-
         const { latitude, longitude } = impactPoint;
         const radius = 1.3;
         const phi = (90 - latitude) * (Math.PI / 180);
@@ -28,8 +27,37 @@ function Earth({ impactPoint, blastRadius }) {
         const z = radius * Math.sin(phi) * Math.sin(theta);
         const y = radius * Math.cos(phi);
 
-        return [x, y, z];
+        return new THREE.Vector3(x, y, z);
     }, [impactPoint]);
+
+    // Entry trajectory line
+    const trajectoryPoints = useMemo(() => {
+        if (!impactPosition || !impactAngle) return null;
+
+        // Surface normal (radial vector from Earth’s center)
+        const normal = impactPosition.clone().normalize();
+
+        // Pick a tangent direction (eastward)
+        const tangent = new THREE.Vector3().crossVectors(normal, new THREE.Vector3(0, 1, 0));
+        if (tangent.length() < 1e-6) {
+            // If impact at poles, pick X axis
+            tangent.set(1, 0, 0);
+        }
+        tangent.normalize();
+
+        // Rotate normal towards tangent by (90 - angle)
+        const angleRad = (90 - impactAngle) * (Math.PI / 180);
+        const direction = normal.clone().applyAxisAngle(
+            tangent,
+            angleRad
+        );
+
+        // Line extends outward from surface
+        const start = impactPosition.clone();
+        const end = impactPosition.clone().add(direction.multiplyScalar(5));
+
+        return [start, end];
+    }, [impactPosition, impactAngle]);
 
     return (
         <>
@@ -60,6 +88,7 @@ function Earth({ impactPoint, blastRadius }) {
             {/* Impact marker */}
             {impactPosition && (
                 <>
+                    {/* Marker */}
                     <Sphere position={impactPosition} args={[0.03, 16, 16]}>
                         <meshBasicMaterial color="#ff0000" />
                     </Sphere>
@@ -77,6 +106,15 @@ function Earth({ impactPoint, blastRadius }) {
                         </mesh>
                     )}
 
+                    {/* Angle trajectory line */}
+                    {trajectoryPoints && (
+                        <Line
+                            points={trajectoryPoints}
+                            color="yellow"
+                            lineWidth={2}
+                        />
+                    )}
+
                     <Html position={impactPosition} distanceFactor={2}>
                         <div className="bg-red-500 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
                             Impact Zone
@@ -90,20 +128,20 @@ function Earth({ impactPoint, blastRadius }) {
 
 function Moon() {
     const moonTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Moon/8k_moon.jpg');
-    
+
     // Moon orbits at a realistic distance (scaled down)
     const moonDistance = 4.5;
     const angle = Math.PI / 4; // 45 degrees
     const yOffset = 0.3; // Moon's y-position offset
-    
+
     return (
         <>
-            <Sphere 
+            <Sphere
                 position={[
                     moonDistance * Math.cos(angle),
                     yOffset,
                     moonDistance * Math.sin(angle)
-                ]} 
+                ]}
                 args={[0.26, 32, 32]}
             >
                 <meshStandardMaterial
@@ -127,23 +165,26 @@ function Moon() {
 }
 
 function Sun() {
+    const sunTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Sun/8k_sun.jpg');
     // Sun position - placed to create day/night effect
     const sunDistance = 15;
-    
+
     return (
         <>
             <Sphere position={[sunDistance, 2, 0]} args={[2, 32, 32]}>
-                <meshBasicMaterial 
-                    color="#FDB813" 
-                    emissive="#FDB813"
-                    emissiveIntensity={1}
+                <meshStandardMaterial
+                    map={sunTexture}
+                    color="white" // don’t tint over the texture
+                    emissive="white"
+                    emissiveMap={sunTexture} // makes the texture itself emit light
+                    emissiveIntensity={1.5}
                 />
             </Sphere>
-            
+
             {/* Lens flare effect */}
-            <pointLight 
-                position={[sunDistance, 2, 0]} 
-                intensity={2.5} 
+            <pointLight
+                position={[sunDistance, 2, 0]}
+                intensity={2.5}
                 color="#ffffff"
                 distance={50}
             />
@@ -161,20 +202,20 @@ function AsteroidApproach({ show }) {
     );
 }
 
-export default function EarthScene({ impactPoint, blastRadius, showAsteroid }) {
+export default function EarthScene({ impactPoint, blastRadius, showAsteroid, impactAngle }) {
     return (
         <div className="w-full h-full bg-black">
             <Canvas camera={{ position: [0, 0, 4], fov: 50 }}>
                 {/* Ambient light - lower intensity for space realism */}
                 <ambientLight intensity={0.15} />
-                
+
                 {/* Sun directional light - simulates sunlight */}
                 <directionalLight
                     position={[15, 2, 0]}
                     intensity={2.0}
                     color="#ffffff"
                 />
-                
+
                 {/* Fill light from opposite side - subtle */}
                 <pointLight position={[-10, 0, -5]} intensity={0.2} color="#4466ff" />
 
@@ -182,7 +223,8 @@ export default function EarthScene({ impactPoint, blastRadius, showAsteroid }) {
                 <Sun />
 
                 {/* Earth and impact */}
-                <Earth impactPoint={impactPoint} blastRadius={blastRadius} />
+                {/* pass impactAngle down */}
+                <Earth impactPoint={impactPoint} blastRadius={blastRadius} impactAngle={impactAngle} />
 
                 {/* Moon */}
                 <Moon />
@@ -195,7 +237,7 @@ export default function EarthScene({ impactPoint, blastRadius, showAsteroid }) {
                     enablePan={false}
                     minDistance={2}
                     maxDistance={8}
-                    autoRotate
+                    // autoRotate
                     autoRotateSpeed={0.3}
                 />
 

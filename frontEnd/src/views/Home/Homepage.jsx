@@ -111,6 +111,7 @@ const Homepage = () => {
                     impactPoint={results?.impact_location}
                     blastRadius={results?.damage_zones.blast_radius_km}
                     showAsteroid={showAsteroid}
+                    impactAngle={params.angle}
                 />
 
                 {/* Loading Overlay */}
