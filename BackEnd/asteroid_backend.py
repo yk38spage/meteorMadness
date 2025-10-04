@@ -280,7 +280,11 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
 
 def asteroid_orbital(Request: ImpactRequest):
-    distanceOfEarth = 10*math.sin(Request.angle)
-    while distanceOfEarth > 0:
-        distanceOfEarth -= 0.1
+    distanceOfAsteroid = 4*math.sin(Request.angle)
+    while distanceOfAsteroid > 0:
+        distanceOfAsteroid -= 0.1
         time.sleep(0.1)
+        return {"Asteroid_distance": distanceOfAsteroid ,
+                "Asteroid_impact": False}
+    return {"Asteroid_distance": distanceOfAsteroid ,
+                "Asteroid_impact": True}
