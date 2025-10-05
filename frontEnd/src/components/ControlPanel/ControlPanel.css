@@ -30,6 +30,10 @@
     padding: 10px;
     border-radius: 15px;
 }
+.control-panel-container .control-panel h1 {
+    color: var(--text);
+    font-size: 28px;
+}
 
 .control-panel-container .control-panel.hidden {
     display: none;
@@ -38,5 +42,6 @@
 @media screen and (max-width: 1000px) {
     .control-panel-container .to-top {
         align-self: flex-start;
+        margin-top: 50px;
     }
 }

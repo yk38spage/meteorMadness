@@ -48,7 +48,7 @@ export default function ControlPanel({
             <div className={`h-full overflow-y-auto bg-gray-900 text-white p-6 space-y-6 control-panel ${show ? '' : 'hidden'}`}>
                 {/* Header */}
                 <div>
-                    <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+                    <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r bg-clip-text text-transparent" >
                         Asteroid Impact Simulator
                     </h1>
                     <p className="text-sm text-gray-400">
@@ -121,7 +121,7 @@ export default function ControlPanel({
                                     step="0.1"
                                     value={params.latitude}
                                     onChange={(e) => setParams({ ...params, latitude: parseFloat(e.target.value) })}
-                                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-green-500"
+                                    className="w-full"
                                 />
                             </div>
                             <div>
@@ -133,7 +133,7 @@ export default function ControlPanel({
                                     step="0.1"
                                     value={params.longitude}
                                     onChange={(e) => setParams({ ...params, longitude: parseFloat(e.target.value) })}
-                                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-green-500"
+                                    className="w-full"
                                 />
                             </div>
                         </div>
@@ -149,7 +149,7 @@ export default function ControlPanel({
                                 step="10"
                                 value={params.distance}
                                 onChange={(e) => setParams({ ...params, distance: parseFloat(e.target.value) })}
-                                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-green-500"
+                                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
                             />
                             <div className="flex justify-between text-xs text-gray-500 mt-1">
                                 <span>10,000 km</span>
@@ -205,7 +205,7 @@ export default function ControlPanel({
                                 step="0.1"
                                 value={params.horizontal_velocity_km_s}
                                 onChange={(e) => setParams({ ...params, horizontal_velocity_km_s: parseFloat(e.target.value) })}
-                                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
                             />
                             <div className="flex justify-between text-xs text-gray-500 mt-1">
                                 <span>← 120 km/s West</span>
@@ -224,7 +224,7 @@ export default function ControlPanel({
                                 step="0.1"
                                 value={params.vertical_velocity_km_s}
                                 onChange={(e) => setParams({ ...params, vertical_velocity_km_s: parseFloat(e.target.value) })}
-                                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
                             />
                             <div className="flex justify-between text-xs text-gray-500 mt-1">
                                 <span>↓ 120 km/s South</span>
@@ -243,7 +243,7 @@ export default function ControlPanel({
                                 step="0.1"
                                 value={params.z_velocity_km_s}
                                 onChange={(e) => setParams({ ...params, z_velocity_km_s: parseFloat(e.target.value) })}
-                                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-500"
+                                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
                             />
                             <div className="flex justify-between text-xs text-gray-500 mt-1">
                                 <span>0 km/s (stationary)</span>
@@ -252,7 +252,7 @@ export default function ControlPanel({
                         </div>
 
                         <div className="mt-3 p-2 bg-blue-900/30 border border-blue-700 rounded text-xs text-blue-300">
-                            💡 Tip: Higher radial velocity increases impact likelihood. Adjust E-W and N-S velocities to change impact location.
+                            <i className="fa-solid fa-lightbulb"></i> Tip: Higher radial velocity increases impact likelihood. Adjust E-W and N-S velocities to change impact location.
                         </div>
                     </div>
                 </div>
@@ -268,7 +268,7 @@ export default function ControlPanel({
                         max="100"
                         value={params.simulation_speed}
                         onChange={(e) => setParams({ ...params, simulation_speed: parseFloat(e.target.value) })}
-                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
                     />
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
                         <span>Pause (0)</span>
@@ -280,11 +280,11 @@ export default function ControlPanel({
                 {loading ? (
                     <Button type="button" priority="primary" icon="fa-solid fa-play" onClick={onSimulate} disabled><BasicSpinner />Simulating...</Button>
                 ) : (
-                    <Button type="button" priority="primary" icon="fa-solid fa-play" onClick={onSimulate}><i className="fa-solid fa-play"></i>Simulate Trajectory</Button>
+                    <Button type="button" priority="primary" icon="fa-solid fa-play" onClick={onSimulate}>Simulate Trajectory</Button>
                 )}
 
                 {/* Mitigation Section */}
-                <div className="border-t border-gray-700 pt-4 space-y-3">
+                <div className="border-t border-gray-700 pt-4 space-y-3 flex flex-col gap-2">
                     <button
                         onClick={() => setShowMitigation(!showMitigation)}
                         className="flex items-center gap-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors"
@@ -295,8 +295,8 @@ export default function ControlPanel({
                     </button>
 
                     {showMitigation && (
-                        <div className="space-y-3 pl-6">
-                            <div>
+                        <div className="space-y-3 pl-6 flex flex-col gap-2">
+                            {/* <div>
                                 <label className="text-xs text-gray-400 mb-1 block">
                                     Warning Time: {mitigationYears} years
                                 </label>
@@ -309,7 +309,7 @@ export default function ControlPanel({
                                     onChange={(e) => setMitigationYears(parseFloat(e.target.value))}
                                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-green-500"
                                 />
-                            </div>
+                            </div> */}
 
                             <div>
                                 <label className="text-xs text-gray-400 mb-1 block">Method</label>
@@ -323,20 +323,22 @@ export default function ControlPanel({
                                 </select>
                             </div>
 
-                            <button
+                            <Button
+                                type="button"
+                                priority="primary"
+                                icon="fa-solid fa-shield-halved"
                                 onClick={handleMitigate}
                                 disabled={loading}
-                                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-700 text-white font-semibold py-2 rounded transition-all disabled:cursor-not-allowed"
                             >
-                                {loading ? 'Evaluating...' : <><i className="fa-solid fa-shield-halved mr-2"></i>Evaluate Defense</>}
-                            </button>
+                                {loading ? 'Evaluating...' : 'Evaluate Defense'}
+                            </Button>
                         </div>
                     )}
                 </div>
 
                 {/* Info Box */}
                 <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3 text-xs text-gray-300">
-                    <div className="font-semibold mb-1 text-blue-400">ℹ️ How it Works</div>
+                    <div className="font-semibold mb-1 text-blue-400"><i className="fa-solid fa-circle-info"></i> How it Works</div>
                     <p>Set the asteroid's starting position and velocity. The simulator will calculate if and where it impacts Earth using real physics.</p>
                 </div>
             </div>

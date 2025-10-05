@@ -42,5 +42,6 @@
 @media screen and (max-width: 1000px) {
     .results-container .to-bottom {
         align-self: flex-end;
+        margin-bottom: 50px;
     }
 }

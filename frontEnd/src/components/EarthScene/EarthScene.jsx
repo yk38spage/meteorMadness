@@ -64,17 +64,16 @@ function Earth({ impactPoint, blastRadius }) {
                         <meshBasicMaterial color="#ff0000" />
                     </Sphere>
 
-                    {/* Blast radius circle */}
+                    {/* Blast radius sphere */}
                     {blastRadius && (
-                        <mesh position={impactPosition} rotation={[-Math.PI / 2, 0, 0]}>
-                            <ringGeometry args={[0, blastRadius / 6371, 32]} />
+                        <Sphere position={impactPosition} args={[blastRadius / 6371 > 2.5 ? 2.5 : blastRadius / 6371, 32, 32]}>
                             <meshBasicMaterial
                                 color="#ff6600"
                                 transparent
                                 opacity={0.4}
                                 side={THREE.DoubleSide}
                             />
-                        </mesh>
+                        </Sphere>
                     )}
 
                     <Html position={impactPosition} distanceFactor={2}>
@@ -118,7 +117,7 @@ function Moon() {
                     metalness={0.0}
                 />
             </Sphere>
-            <mesh position={[0, yOffset, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            {/* <mesh position={[0, yOffset, 0]} rotation={[Math.PI / 2, 0, 0]}>
                 <ringGeometry args={[moonDistance - 0.05, moonDistance + 0.05, 64]} />
                 <meshBasicMaterial
                     color="#555555"
@@ -126,16 +125,16 @@ function Moon() {
                     opacity={0.3}
                     side={THREE.DoubleSide}
                 />
-            </mesh>
+            </mesh> */}
         </>
     );
 }
 
 function Sun() {
     const sunTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Sun/8k_sun.jpg');
-    const sunDistance = 15;
+    const sunDistance = 40;
     return (
-        <Sphere position={[sunDistance, 2, 0]} args={[2, 32, 32]}>
+        <Sphere position={[sunDistance, 2, 0]} args={[4, 32, 32]}>
             <meshStandardMaterial
                 map={sunTexture}
                 color="white"
@@ -360,8 +359,8 @@ function AsteroidApproach({ show, params, initialLocation, onImpact }) {
                     emissive="#ff5555"
                     emissiveIntensity={0.3}
                 />
-                <Html distanceFactor={2}>
-                    <div className="bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
+                <Html>
+                    <div className="bg-gray-800 text-white px-2 py-1 rounded text-lg whitespace-nowrap">
                         Asteroid ({params.diameter_km} km)
                         {trajectoryData.crashed === false && " - Will miss Earth"}
                     </div>

@@ -132,8 +132,8 @@ const Homepage = () => {
     if (loadingAsteroids) {
         return (
             <div className="h-screen flex items-center justify-center bg-gray-900 text-white">
-                <div className="text-center">
-                    <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4" />
+                <div className="text-center flex gap-1 items-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
                     <p>Loading asteroid data from NASA...</p>
                 </div>
             </div>
@@ -181,7 +181,7 @@ const Homepage = () => {
 
                 {/* Info Overlay */}
                 <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm rounded-lg p-3 text-white text-sm max-w-xs">
-                    <div className="font-bold mb-1">🌍 Interactive Earth</div>
+                    <div className="font-bold mb-1"><i className="fa-solid fa-earth-europe"></i> Interactive Earth</div>
                     <div className="text-xs text-gray-300">
                         • Drag to rotate<br />
                         • Scroll to zoom<br />
@@ -234,10 +234,21 @@ const Homepage = () => {
                             </p>
                         </div>
                     ) : (
-                        <ResultsDashboard
-                            results={results}
-                            mitigationResults={mitigationResults}
-                        />
+                        <>
+                            {results && results.crater.airburst && (
+                                <div className="bg-green-900/30 border border-green-700 rounded-lg p-4 text-white">
+                                    <h3 className="font-bold mb-2">Probably No Impact</h3>
+                                    <p className="text-sm">
+                                        The asteroid will be highly likely burn on the atmosphere.
+                                    </p>
+                                </div>
+                            )}
+
+                            <ResultsDashboard
+                                results={results}
+                                mitigationResults={mitigationResults}
+                            />
+                        </>
                     )}
                 </div>
                 <Button type="button" priority="secondary" icon={!showResult ? 'fa-solid fa-square-poll-vertical' : 'fa-solid fa-angle-right'} onClick={() => setShowResult(!showResult)} title={showResult ? 'Hide Results' : 'Show Results'} className={showResult ? 'to-bottom' : ''} />
