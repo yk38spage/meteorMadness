@@ -77,7 +77,7 @@ button:focus-visible {
 
 :root {
     --bg-dark: hsl(0, 0%, 0%);
-    --bg-normal: hsl(0, 0%, 5%);
+    --bg-normal: hsla(0, 0%, 5%, 0.7);
     --bg-light: hsl(0, 0%, 10%);
     --text: hsl(0, 0%, 95%);
     --text-muted: hsl(0, 0%, 70%);

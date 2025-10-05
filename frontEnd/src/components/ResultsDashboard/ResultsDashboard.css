@@ -1,11 +1,15 @@
-.control-panel-container {
+.results-container {
     display: flex;
+    flex-direction: row-reverse;
+    /* Use row instead of row-reverse for natural item order */
     position: absolute;
-    left: 0;
+    right: 0;
+    /* Pins the container to the right edge */
     top: 50%;
-    transform: translate(0, -50%);
+    /* Positions the top at the vertical center */
+    transform: translateY(-50%);
+    /* Shifts upward by half the container's height for vertical centering */
     z-index: 5;
-    /* height: 100%; */
     max-height: 100vh;
     align-items: center;
     margin: 10px;
@@ -13,11 +17,11 @@
     overflow-y: auto;
 }
 
-.control-panel-container>button {
+.results-container>button {
     width: fit-content;
 }
 
-.control-panel-container .control-panel {
+.results-container .results {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -30,18 +34,14 @@
     padding: 10px;
     border-radius: 15px;
 }
-.control-panel-container .control-panel h1 {
-    color: var(--text);
-    font-size: 28px;
-}
 
-.control-panel-container .control-panel.hidden {
+.results-container .results.hidden {
     display: none;
 }
 
 @media screen and (max-width: 1000px) {
-    .control-panel-container .to-top {
-        align-self: flex-start;
-        margin-top: 50px;
+    .results-container .to-bottom {
+        align-self: flex-end;
+        margin-bottom: 50px;
     }
 }

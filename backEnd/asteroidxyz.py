@@ -111,13 +111,14 @@ def get_variables():
     print(f"Adımlar: {info['steps']}, Çarpıştı: {info['crashed']}, Son yarıçap: {info['final_r']:.3e} m")
     # Örnek: ilk 5 adımı yazdır
     for i in range(max_steps):
-        return { "asteroidX":x[i],
-                "asteroidY":y[i],
-                "asteroidZ":z[i],
-                "velocityX":v[i,0],
-                "velocityY":v[i,1],
-                "velocityZ":v[i,2],
-                "accelerationX":a[i,0],
-                "accelerationY":a[i,0],
-                "accelerationZ":a[i,0],
-                }
+        return {
+            "asteroidX" : x[i],
+            "asteroidY" : y[i],
+            "asteroidZ" : z[i],
+            "velocityX" : v[i,0],
+            "velocityY" : v[i,1],
+            "velocityZ" : v[i,2],
+            "accelerationX" : a[i,0],
+            "accelerationY" : a[i,0],
+            "accelerationZ" : a[i,0],
+        }

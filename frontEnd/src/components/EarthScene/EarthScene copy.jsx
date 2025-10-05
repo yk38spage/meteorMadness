@@ -1,6 +1,6 @@
 import { Canvas, useLoader, useFrame } from '@react-three/fiber';
 import { OrbitControls, Sphere, Html } from '@react-three/drei';
-import { useRef, useMemo, useEffect, useState } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import * as THREE from 'three';
 
 function Earth({ impactPoint, blastRadius }) {
@@ -20,7 +20,7 @@ function Earth({ impactPoint, blastRadius }) {
         if (!impactPoint) return null;
 
         const { latitude, longitude } = impactPoint;
-        const radius = 1; // Earth radius in model units
+        const radius = 1; // Updated Earth radius
         const phi = (90 - latitude) * (Math.PI / 180);
         const theta = (longitude + 180) * (Math.PI / 180);
 
@@ -34,7 +34,7 @@ function Earth({ impactPoint, blastRadius }) {
     return (
         <>
             {/* Earth with day/night textures */}
-            <Sphere ref={earthRef} args={[1, 64, 64]}>
+            <Sphere ref={earthRef} args={[1, 64, 64]}> {/* Updated radius to 1 */}
                 <meshStandardMaterial
                     map={dayMap}
                     normalMap={normalMap}
@@ -48,7 +48,7 @@ function Earth({ impactPoint, blastRadius }) {
             </Sphere>
 
             {/* Cloud layer */}
-            <Sphere args={[1.02, 64, 64]}>
+            <Sphere args={[1.02, 64, 64]}> {/* Adjusted cloud radius */}
                 <meshStandardMaterial
                     map={cloudsMap}
                     transparent
@@ -64,16 +64,17 @@ function Earth({ impactPoint, blastRadius }) {
                         <meshBasicMaterial color="#ff0000" />
                     </Sphere>
 
-                    {/* Blast radius sphere */}
+                    {/* Blast radius circle */}
                     {blastRadius && (
-                        <Sphere position={impactPosition} args={[blastRadius / 6371 > 2.5 ? 2.5 : blastRadius / 6371, 32, 32]}>
+                        <mesh position={impactPosition} rotation={[-Math.PI / 2, 0, 0]}>
+                            <ringGeometry args={[0, blastRadius / 6371, 32]} />
                             <meshBasicMaterial
                                 color="#ff6600"
                                 transparent
                                 opacity={0.4}
                                 side={THREE.DoubleSide}
                             />
-                        </Sphere>
+                        </mesh>
                     )}
 
                     <Html position={impactPosition} distanceFactor={2}>
@@ -91,12 +92,14 @@ function Moon() {
     const moonRef = useRef();
     const moonTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Moon/8k_moon.jpg');
 
+    // Moon orbits at a realistic distance (scaled down)
     const moonDistance = 4.5;
-    const yOffset = 0.3;
+    const yOffset = 0.3; // Moon's y-position offset
 
+    // Animate Moon orbit
     useFrame(({ clock }) => {
         const time = clock.getElapsedTime();
-        const angle = time * 0.1;
+        const angle = time * 0.1; // Adjust speed of orbit (0.1 rad/s for smooth animation)
         moonRef.current.position.set(
             moonDistance * Math.cos(angle),
             yOffset,
@@ -108,45 +111,7 @@ function Moon() {
         <>
             <Sphere
                 ref={moonRef}
-                position={[moonDistance, yOffset, 0]}
-                args={[0.26, 32, 32]}
-            >
-                <meshStandardMaterial
-                    map={moonTexture}
-                    roughness={0.9}
-                    metalness={0.0}
-                />
-            </Sphere>
-            {/* <mesh position={[0, yOffset, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[moonDistance - 0.05, moonDistance + 0.05, 64]} />
-                <meshBasicMaterial
-                    color="#555555"
-                    transparent
-                    opacity={0.3}
-                    side={THREE.DoubleSide}
-                />
-            </mesh> */}
-        </>
-    );
-}
-function Asteroid() {
-    const moonTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Moon/8k_moon.jpg');
-
-    let asteroidDistance = 4.5;
-    const angle = Math.PI / 4; // 45 degrees
-    const yOffset = 0.3; // Moon's y-position offset
-    while (asteroidDistance > 1.3) {
-        setTimeout(() => {
-            asteroidDistance -= 0.1;
-        }, "100");
-    return (
-        <>
-            <Sphere
-                position={[
-                    asteroidDistance * Math.cos(angle),
-                    yOffset,
-                    asteroidDistance * Math.sin(angle)
-                ]}
+                position={[moonDistance, yOffset, 0]} // Initial position
                 args={[0.26, 32, 32]}
             >
                 <meshStandardMaterial
@@ -157,7 +122,7 @@ function Asteroid() {
             </Sphere>
             {/* Moon orbital path aligned with Moon's position */}
             <mesh position={[0, yOffset, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[asteroidDistance - 0.05, asteroidDistance + 0.05, 64]} />
+                <ringGeometry args={[moonDistance - 0.05, moonDistance + 0.05, 64]} />
                 <meshBasicMaterial
                     color="#555555"
                     transparent
@@ -167,16 +132,13 @@ function Asteroid() {
             </mesh>
         </>
     );
-
-
-    }
 }
 
 function Sun() {
     const sunTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Sun/8k_sun.jpg');
-    const sunDistance = 40;
+    const sunDistance = 15;
     return (
-        <Sphere position={[sunDistance, 2, 0]} args={[4, 32, 32]}>
+        <Sphere position={[sunDistance, 2, 0]} args={[2, 32, 32]}>
             <meshStandardMaterial
                 map={sunTexture}
                 color="white"
@@ -188,16 +150,16 @@ function Sun() {
     );
 }
 
-function AsteroidApproach({ show, params, initialLocation, onImpact }) {
+function AsteroidApproach({ show, params, targetLocation, onImpact }) {
     const asteroidRef = useRef();
     const rEarth = 1; // Model Earth radius
 
-    // Real-world constants
+    // Real-world constants (from Python)
     const G = 6.67430e-11; // m^3 kg^-1 s^-2
     const M = 5.972e24; // kg
     const R_EARTH_REAL = 6.371e6; // m
 
-    // Gravity acceleration function
+    // Ported gravity acceleration function
     const gravityAcceleration = (pos) => {
         const r = pos.length();
         if (r === 0) return new THREE.Vector3(0, 0, 0);
@@ -205,7 +167,7 @@ function AsteroidApproach({ show, params, initialLocation, onImpact }) {
         return pos.clone().multiplyScalar(a_mag / r);
     };
 
-    // RK4 integration step
+    // Ported RK4 step function
     const rk4Step = (pos, vel, dt) => {
         const acc = gravityAcceleration;
 
@@ -239,46 +201,23 @@ function AsteroidApproach({ show, params, initialLocation, onImpact }) {
         return [pos_new, vel_new];
     };
 
-    // Simulate trajectory
-    const simulate = (position0, velocity0, dt = 0.5, max_steps = 100000) => {
+    // Ported simulate function (returns precomputed positions in real units)
+    const simulate = (position0, velocity0, dt = 0.5, max_steps = 20000, crash_on_surface = true) => {
         let pos = position0.clone();
         let vel = velocity0.clone();
 
         const positions = [];
         let crashed = false;
         let step = 0;
-        let impactData = null;
 
         while (step < max_steps) {
+            const r = pos.length();
+            const a = gravityAcceleration(pos);
+
             positions.push(pos.clone());
 
-            const r = pos.length();
-
-            // Check for Earth collision
-            if (r <= R_EARTH_REAL) {
+            if (crash_on_surface && r <= R_EARTH_REAL) {
                 crashed = true;
-
-                // Calculate impact location (lat/lon)
-                const normalized = pos.clone().normalize();
-                const latitude = Math.asin(normalized.y) * (180 / Math.PI);
-                const longitude = Math.atan2(normalized.z, -normalized.x) * (180 / Math.PI) - 180;
-
-                // Calculate impact angle
-                const surfaceNormal = pos.clone().normalize();
-                const velocityNormalized = vel.clone().normalize();
-                const cosAngle = -surfaceNormal.dot(velocityNormalized);
-                const impactAngle = Math.acos(Math.max(-1, Math.min(1, cosAngle))) * (180 / Math.PI);
-
-                impactData = {
-                    location: { latitude, longitude },
-                    angle: impactAngle,
-                    velocity: vel.length() / 1000 // Convert to km/s
-                };
-                break;
-            }
-
-            // Check if escaped (too far away)
-            if (r > R_EARTH_REAL * 100) {
                 break;
             }
 
@@ -286,80 +225,85 @@ function AsteroidApproach({ show, params, initialLocation, onImpact }) {
             step++;
         }
 
-        return { positions, crashed, impactData, steps: step };
+        const terminated = { crashed, steps: step, final_r: pos.length() };
+        return { positions, terminated };
     };
 
-    // Precompute trajectory
-    const trajectoryData = useMemo(() => {
-        if (!show || !initialLocation) return null;
+    // Compute target position (model units)
+    const targetPosition = useMemo(() => {
+        if (!targetLocation) return null;
 
-        // Convert initial lat/lon to 3D position at specified distance
-        const { latitude, longitude } = initialLocation;
+        const { latitude, longitude } = targetLocation;
         const phi = (90 - latitude) * (Math.PI / 180);
         const theta = (longitude + 180) * (Math.PI / 180);
 
-        // Unit vectors for the coordinate system at this point
-        const radialUnit = new THREE.Vector3(
-            -Math.sin(phi) * Math.cos(theta),
-            Math.cos(phi),
-            Math.sin(phi) * Math.sin(theta)
-        );
+        const x = -(Math.sin(phi) * Math.cos(theta));
+        const z = Math.sin(phi) * Math.sin(theta);
+        const y = Math.cos(phi);
 
-        // East unit vector (tangent to longitude lines)
-        const eastUnit = new THREE.Vector3(
-            Math.sin(theta),
-            0,
-            Math.cos(theta)
-        );
+        return new THREE.Vector3(x, y, z);
+    }, [targetLocation]);
 
-        // North unit vector (tangent to latitude lines)
-        const northUnit = new THREE.Vector3(
-            -Math.cos(phi) * Math.cos(theta),
-            -Math.sin(phi),
-            Math.cos(phi) * Math.sin(theta)
-        );
+    // Precompute trajectory and animation params
+    const trajectoryData = useMemo(() => {
+        if (!show || !targetPosition) return null;
 
-        // Initial position in real units (m)
-        const distanceM = params.distance * 1000 * 1000; // Convert from thousands of km to m
-        const initial_pos_real = radialUnit.clone().multiplyScalar(R_EARTH_REAL + distanceM);
+        const phi = (90 - targetLocation.latitude) * (Math.PI / 180);
+        const theta = (targetLocation.longitude + 180) * (Math.PI / 180);
+
+        const radialUnit = targetPosition.clone().normalize();
+        const unitEast = new THREE.Vector3(Math.sin(theta), 0, Math.cos(theta));
+        const unitNorth = new THREE.Vector3(
+            Math.cos(phi) * Math.cos(theta),
+            Math.sin(phi),
+            -Math.cos(phi) * Math.sin(theta)
+        );
 
         // Initial velocity in real units (m/s)
         const vel_real = new THREE.Vector3();
-        vel_real.addScaledVector(eastUnit, params.horizontal_velocity_km_s * 1000);
-        vel_real.addScaledVector(northUnit, params.vertical_velocity_km_s * 1000);
-        vel_real.addScaledVector(radialUnit, -params.z_velocity_km_s * 1000); // Negative for toward Earth
+        vel_real.addScaledVector(unitEast, params.horizontal_velocity_km_s * 1000);
+        vel_real.addScaledVector(unitNorth, params.vertical_velocity_km_s * 1000);
+        vel_real.addScaledVector(radialUnit, -params.z_velocity_km_s * 1000);
+
+        const speed_real = vel_real.length();
+        if (speed_real === 0) return null;
+
+        const direction = vel_real.clone().normalize();
+
+        // Initial position in real units (m)
+        const realDistanceM = params.distance * 1000; // Assuming params.distance in km
+        const initial_pos_real = targetPosition.clone()
+            .multiplyScalar(R_EARTH_REAL)
+            .sub(direction.clone().multiplyScalar(realDistanceM));
 
         // Run simulation
-        const dt = 0.5; // Time step in seconds
-        const { positions: positions_real, crashed, impactData, steps } = simulate(initial_pos_real, vel_real, dt);
+        const dt = 0.5; // Time step in seconds (from Python)
+        const { positions: positions_real, terminated } = simulate(initial_pos_real, vel_real, dt);
 
-        // Convert positions to model units
+        // Convert to model units
+        const scale = rEarth / (R_EARTH_REAL / 1000); // Since R_EARTH_REAL in m, but scale often per km; adjust if needed
         const positions_model = positions_real.map((p) =>
             p.clone().multiplyScalar(1 / R_EARTH_REAL)
         );
 
-        // Animation timing
+        // Total real simulation time
+        const total_real_time = terminated.steps * dt;
+
+        // Animation time (from existing logic)
         const baseTime = 5;
         const animationTime = params.simulation_speed > 0 ? baseTime * (50 / params.simulation_speed) : Infinity;
 
-        return {
-            positions_model,
-            total_steps: steps,
-            animationTime,
-            crashed,
-            impactData
-        };
-    }, [show, params, initialLocation]);
+        return { positions_model, total_steps: terminated.steps, animationTime, terminated };
+    }, [show, params, targetLocation, targetPosition]);
 
     // Animation state
     const elapsedTimeRef = useRef(0);
-    const impactHandledRef = useRef(false);
 
     useEffect(() => {
         if (show && asteroidRef.current && trajectoryData) {
+            // Start from first position
             asteroidRef.current.position.copy(trajectoryData.positions_model[0]);
             elapsedTimeRef.current = 0;
-            impactHandledRef.current = false;
         }
     }, [show, trajectoryData]);
 
@@ -370,19 +314,13 @@ function AsteroidApproach({ show, params, initialLocation, onImpact }) {
             let frac = elapsedTimeRef.current / trajectoryData.animationTime;
             if (frac >= 1) {
                 frac = 1;
-                if (trajectoryData.crashed && !impactHandledRef.current) {
-                    impactHandledRef.current = true;
-                    onImpact(trajectoryData.impactData);
+                if (trajectoryData.terminated.crashed) {
+                    onImpact();
                 }
             }
 
-            const step = Math.min(
-                Math.floor(frac * (trajectoryData.total_steps - 1)),
-                trajectoryData.positions_model.length - 1
-            );
-            if (trajectoryData.positions_model[step]) {
-                asteroidRef.current.position.copy(trajectoryData.positions_model[step]);
-            }
+            const step = Math.floor(frac * (trajectoryData.total_steps - 1));
+            asteroidRef.current.position.copy(trajectoryData.positions_model[step]);
         }
     });
 
@@ -393,36 +331,23 @@ function AsteroidApproach({ show, params, initialLocation, onImpact }) {
     if (!show || !trajectoryData) return null;
 
     return (
-        <>
-            <Sphere ref={asteroidRef} args={[asteroidSize, 16, 16]}>
-                <meshStandardMaterial
-                    color="#888888"
-                    roughness={0.9}
-                    emissive="#ff5555"
-                    emissiveIntensity={0.3}
-                />
-                <Html>
-                    <div className="bg-gray-800 text-white px-2 py-1 rounded text-lg whitespace-nowrap">
-                        Asteroid ({params.diameter_km} km)
-                        {trajectoryData.crashed === false && " - Will miss Earth"}
-                    </div>
-                </Html>
-            </Sphere>
-
-            {/* Show initial position marker */}
-            {initialLocation && (
-                <Sphere
-                    position={trajectoryData.positions_model[0]}
-                    args={[0.02, 8, 8]}
-                >
-                    <meshBasicMaterial color="#00ff00" opacity={0.5} transparent />
-                </Sphere>
-            )}
-        </>
+        <Sphere ref={asteroidRef} args={[asteroidSize, 16, 16]}>
+            <meshStandardMaterial
+                color="#888888"
+                roughness={0.9}
+                emissive="#ff5555"
+                emissiveIntensity={0.3}
+            />
+            <Html distanceFactor={2}>
+                <div className="bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
+                    Asteroid ({params.diameter_km} km)
+                </div>
+            </Html>
+        </Sphere>
     );
 }
 
-export default function EarthScene({ impactPoint, blastRadius, showAsteroid, params, initialLocation, onImpact }) {
+export default function EarthScene({ impactPoint, blastRadius, showAsteroid, params, targetLocation, onImpact }) {
     return (
         <div className="w-full h-full bg-black">
             <Canvas camera={{ position: [0, 0, 4], fov: 50 }}>
@@ -436,12 +361,7 @@ export default function EarthScene({ impactPoint, blastRadius, showAsteroid, par
                 <Sun />
                 <Earth impactPoint={impactPoint} blastRadius={blastRadius} />
                 <Moon />
-                <AsteroidApproach
-                    show={showAsteroid}
-                    params={params}
-                    initialLocation={initialLocation}
-                    onImpact={onImpact}
-                />
+                <AsteroidApproach show={showAsteroid} params={params} targetLocation={targetLocation} onImpact={onImpact} />
                 <OrbitControls
                     enablePan={false}
                     minDistance={2}
