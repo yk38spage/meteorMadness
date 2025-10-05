@@ -129,6 +129,48 @@ function Moon() {
         </>
     );
 }
+function Asteroid() {
+    const moonTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Moon/8k_moon.jpg');
+
+    let asteroidDistance = 4.5;
+    const angle = Math.PI / 4; // 45 degrees
+    const yOffset = 0.3; // Moon's y-position offset
+    while (asteroidDistance > 1.3) {
+        setTimeout(() => {
+            asteroidDistance -= 0.1;
+        }, "100");
+    return (
+        <>
+            <Sphere
+                position={[
+                    asteroidDistance * Math.cos(angle),
+                    yOffset,
+                    asteroidDistance * Math.sin(angle)
+                ]}
+                args={[0.26, 32, 32]}
+            >
+                <meshStandardMaterial
+                    map={moonTexture}
+                    roughness={0.9}
+                    metalness={0.0}
+                />
+            </Sphere>
+            {/* Moon orbital path aligned with Moon's position */}
+            <mesh position={[0, yOffset, 0]} rotation={[Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[asteroidDistance - 0.05, asteroidDistance + 0.05, 64]} />
+                <meshBasicMaterial
+                    color="#555555"
+                    transparent
+                    opacity={0.3}
+                    side={THREE.DoubleSide}
+                />
+            </mesh>
+        </>
+    );
+
+
+    }
+}
 
 function Sun() {
     const sunTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Sun/8k_sun.jpg');
