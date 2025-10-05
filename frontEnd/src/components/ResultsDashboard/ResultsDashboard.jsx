@@ -160,7 +160,7 @@ export default function ResultsDashboard({ results }) {
             </div>
             {mitigation && (
                 mitigation.mitigation_required ? (
-                    <div className={`p-4 rounded-lg border-2 ${mitigation.feasible ? 'bg-green-900/50 border-green-500' : 'bg-red-900/50 border-red-500'}`}>
+                    <div className={`p-4 rounded-lg border-2 ${mitigation.feasible ? 'bg-green-900/30 border-green-700' : 'bg-red-900/50 border-red-700'}`}>
                         <div className="font-bold text-lg mb-2">
                             {mitigation.method} Strategy
                         </div>
@@ -173,7 +173,7 @@ export default function ResultsDashboard({ results }) {
                         </div>
                     </div>
                 ) : (
-                    <div className={`p-4 rounded-lg border-2 bg-green-900/50 border-green-500}`}>
+                    <div className={`p-4 rounded-lg border bg-green-900/30 border-green-700`}>
                         <div className="font-bold text-lg mb-2">
                             No Mitigation Required
                         </div>

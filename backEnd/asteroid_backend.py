@@ -9,6 +9,9 @@ import numpy as np
 import os
 from datetime import datetime, timedelta
 from typing import Optional
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 app = FastAPI(title="Asteroid Impact Simulator API")
 
@@ -21,8 +24,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-NASA_API_KEY = os.getenv("uIHWZOg9PWP25PlpgspRfbGOqOmdUchgeTXGa1Va", "uIHWZOg9PWP25PlpgspRfbGOqOmdUchgeTXGa1Va")
+NASA_API_KEY = os.getenv("NASA_API_KEY", "API_KEY")
 NASA_BASE_URL = "https://api.nasa.gov/neo/rest/v1"
+# print(NASA_API_KEY)
+# print(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 # Request/Response modelleri
 class ImpactRequest(BaseModel):
