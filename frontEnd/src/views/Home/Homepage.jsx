@@ -9,6 +9,7 @@ import Button from '../../assets/Button/Button';
 
 const Homepage = () => {
     const [asteroids, setAsteroids] = useState([]);
+    // In Homepage.jsx, update the useState for params
     const [params, setParams] = useState({
         diameter_km: 0.5,
         horizontal_velocity_km_s: 20,

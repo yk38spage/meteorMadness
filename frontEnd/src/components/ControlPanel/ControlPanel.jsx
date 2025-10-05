@@ -105,25 +105,6 @@ export default function ControlPanel({
                 {/* Velocity */}
                 <div>
                     <label className="text-xs text-gray-400 mb-1 block">
-                        Velocity: {params.velocity_km_s} km/s
-                    </label>
-                    <input
-                        type="range"
-                        min="10"
-                        max="70"
-                        step="0.1"
-                        value={params.velocity_km_s}
-                        onChange={(e) => setParams({ ...params, velocity_km_s: parseFloat(e.target.value) })}
-                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                        <span>10 km/s</span>
-                        <span>70 km/s</span>
-                    </div>
-                </div>
-
-                <div>
-                    <label className="text-xs text-gray-400 mb-1 block">
                         Horizontal Velocity: {params.horizontal_velocity_km_s} km/s
                     </label>
                     <input
@@ -295,8 +276,8 @@ export default function ControlPanel({
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>0 km/s to surface</span>
-                    <span>120 km/s to surface</span>
+                    <span>Slow (0)</span>
+                    <span>Fast (100)</span>
                 </div>
             </div>
 

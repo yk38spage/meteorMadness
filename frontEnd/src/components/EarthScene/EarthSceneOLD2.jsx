@@ -20,7 +20,7 @@ function Earth({ impactPoint, blastRadius }) {
         if (!impactPoint) return null;
 
         const { latitude, longitude } = impactPoint;
-        const radius = 1; // Updated Earth radius
+        const radius = 1.3;
         const phi = (90 - latitude) * (Math.PI / 180);
         const theta = (longitude + 180) * (Math.PI / 180);
 
@@ -34,7 +34,7 @@ function Earth({ impactPoint, blastRadius }) {
     return (
         <>
             {/* Earth with day/night textures */}
-            <Sphere ref={earthRef} args={[1, 64, 64]}> {/* Updated radius to 1 */}
+            <Sphere ref={earthRef} args={[1.3, 64, 64]}>
                 <meshStandardMaterial
                     map={dayMap}
                     normalMap={normalMap}
@@ -48,7 +48,7 @@ function Earth({ impactPoint, blastRadius }) {
             </Sphere>
 
             {/* Cloud layer */}
-            <Sphere args={[1.02, 64, 64]}> {/* Adjusted cloud radius */}
+            <Sphere args={[1.32, 64, 64]}>
                 <meshStandardMaterial
                     map={cloudsMap}
                     transparent
@@ -89,29 +89,21 @@ function Earth({ impactPoint, blastRadius }) {
 }
 
 function Moon() {
-    const moonRef = useRef();
     const moonTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Moon/8k_moon.jpg');
 
     // Moon orbits at a realistic distance (scaled down)
     const moonDistance = 4.5;
+    const angle = Math.PI / 4; // 45 degrees
     const yOffset = 0.3; // Moon's y-position offset
-
-    // Animate Moon orbit
-    useFrame(({ clock }) => {
-        const time = clock.getElapsedTime();
-        const angle = time * 0.1; // Adjust speed of orbit (0.1 rad/s for smooth animation)
-        moonRef.current.position.set(
-            moonDistance * Math.cos(angle),
-            yOffset,
-            moonDistance * Math.sin(angle)
-        );
-    });
 
     return (
         <>
             <Sphere
-                ref={moonRef}
-                position={[moonDistance, yOffset, 0]} // Initial position
+                position={[
+                    moonDistance * Math.cos(angle),
+                    yOffset,
+                    moonDistance * Math.sin(angle)
+                ]}
                 args={[0.26, 32, 32]}
             >
                 <meshStandardMaterial
@@ -135,15 +127,15 @@ function Moon() {
 }
 
 function Sun() {
-    const sunTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Sun/8k_sun.jpg');
+    const sunTexture = useLoader(THREE.TextureLoader, '/src/assets/textures/Sun/8k_sun.jpg'); // Sun position - placed to create day/night effect
     const sunDistance = 15;
     return (
         <Sphere position={[sunDistance, 2, 0]} args={[2, 32, 32]}>
             <meshStandardMaterial
                 map={sunTexture}
-                color="white"
+                color="white" // don’t tint over the texture
                 emissive="white"
-                emissiveMap={sunTexture}
+                emissiveMap={sunTexture} // makes the texture itself emit light
                 emissiveIntensity={1.5}
             />
         </Sphere>
@@ -152,7 +144,7 @@ function Sun() {
 
 function AsteroidApproach({ show, params, targetLocation, onImpact }) {
     const asteroidRef = useRef();
-    const rEarth = 1; // Updated Earth radius
+    const rEarth = 1.3;
 
     const targetPosition = useMemo(() => {
         if (!targetLocation) return null;
@@ -186,20 +178,21 @@ function AsteroidApproach({ show, params, targetLocation, onImpact }) {
         const velVector = new THREE.Vector3();
         velVector.addScaledVector(unitEast, params.horizontal_velocity_km_s);
         velVector.addScaledVector(unitNorth, params.vertical_velocity_km_s);
-        velVector.addScaledVector(radialUnit, -params.z_velocity_km_s);
+        velVector.addScaledVector(radialUnit, -params.z_velocity_km_s); // inward
 
         const speed = velVector.length();
         if (speed === 0) return null;
 
         const direction = velVector.clone().normalize();
 
-        const scale = rEarth / 6371;
+        const scale = rEarth / 6371; // units per km
         const realDistanceKm = params.distance * 1000;
         let modelDistance = realDistanceKm * scale;
-        const maxModelDistance = 20;
+        const maxModelDistance = 20; // Cap to prevent invisibly far starts
         modelDistance = Math.min(modelDistance, maxModelDistance);
 
-        const baseTime = 5;
+        // Animation time (in seconds) - adjusted by simulation_speed
+        const baseTime = 5; // base 5 seconds at simulation_speed=50
         const animationTime = params.simulation_speed > 0 ? baseTime * (50 / params.simulation_speed) : Infinity;
 
         const velMag = modelDistance / animationTime;
@@ -237,8 +230,9 @@ function AsteroidApproach({ show, params, targetLocation, onImpact }) {
         }
     });
 
-    const baseSize = 0.0001;
-    const scaleFactor = 0.0001;
+    // Enhanced size scaling: minimum size for visibility, scales with diameter
+    const baseSize = 0.0001; // Minimum size for small asteroids
+    const scaleFactor = 0.0001; // Scaling per km for better visual range
     const asteroidSize = Math.max(baseSize, params.diameter_km * scaleFactor);
 
     if (!show) return null;
@@ -248,10 +242,10 @@ function AsteroidApproach({ show, params, targetLocation, onImpact }) {
             <meshStandardMaterial
                 color="#888888"
                 roughness={0.9}
-                emissive="#ff5555"
+                emissive="#ff5555" // Subtle red glow for visibility
                 emissiveIntensity={0.3}
             />
-            <Html distanceFactor={2}>
+            <Html distanceFactor={2}>  {/* Now a child—no position prop needed */}
                 <div className="bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
                     Asteroid ({params.diameter_km} km)
                 </div>
@@ -264,24 +258,41 @@ export default function EarthScene({ impactPoint, blastRadius, showAsteroid, par
     return (
         <div className="w-full h-full bg-black">
             <Canvas camera={{ position: [0, 0, 4], fov: 50 }}>
+                {/* Ambient light - lower intensity for space realism */}
                 <ambientLight intensity={0.15} />
+
+                {/* Sun directional light - simulates sunlight */}
                 <directionalLight
                     position={[15, 2, 0]}
                     intensity={2.0}
                     color="#ffffff"
                 />
+
+                {/* Fill light from opposite side - subtle */}
                 <pointLight position={[-10, 0, -5]} intensity={0.2} color="#4466ff" />
+
+                {/* Sun */}
                 <Sun />
+
+                {/* Earth and impact */}
                 <Earth impactPoint={impactPoint} blastRadius={blastRadius} />
+
+                {/* Moon */}
                 <Moon />
+
+                {/* Asteroid */}
                 <AsteroidApproach show={showAsteroid} params={params} targetLocation={targetLocation} onImpact={onImpact} />
+
+                {/* Controls */}
                 <OrbitControls
                     enablePan={false}
                     minDistance={2}
-                    maxDistance={30}
+                    maxDistance={30} // Increased to allow viewing farther asteroids
                     autoRotate
                     autoRotateSpeed={0.3}
                 />
+
+                {/* Stars background */}
                 <mesh>
                     <sphereGeometry args={[100, 32, 32]} />
                     <meshBasicMaterial color="#000011" side={THREE.BackSide} />
