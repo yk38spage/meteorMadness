@@ -352,9 +352,10 @@ async def simulate_impact(request: ImpactRequest):
         diameter_m = request.diameter_km * 1000
         velocity_m_s = request.velocity_km_s * 1000
         theta = math.radians(request.impact_angle)
+        density = request.density_kg_m3 or 2500 # Assuming an average density of an asteroid is 2500 kg/m^3, if not provided
 
         # Mass & energy
-        mass = (4/3) * math.pi * (diameter_m/2)**3 * request.density_kg_m3
+        mass = (4/3) * math.pi * (diameter_m/2)**3 * density
         E = kinetic_energy(mass, velocity_m_s)
 
         # Megaton TNT conversion (1 MT TNT = 4.184e15 J)
@@ -362,7 +363,7 @@ async def simulate_impact(request: ImpactRequest):
         kilotons = megatons * 1000
 
         # Calculations
-        crater_diam, crater_depth = crater_diameter(diameter_m, velocity_m_s, request.density_kg_m3, request.impact_angle)
+        crater_diam, crater_depth = crater_diameter(diameter_m, velocity_m_s, density, request.impact_angle)
         blast = blast_radius(E)
         thermal = thermal_radius(E)
         tsunami_h = tsunami_height(diameter_m, velocity_m_s, request.impact_angle, 100)
