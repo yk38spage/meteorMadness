@@ -112,11 +112,11 @@ export default function ResultsDashboard({ results, mitigationResults }) {
             <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 text-xs">
                 <div className="font-semibold mb-2 text-gray-300">Impact Details</div>
                 <div className="space-y-1 text-gray-400">
-                    <div>Asteroid Mass: {(results.asteroid_params.mass_kg / 1e9).toFixed(2)} billion kg</div>
+                    {/* <div>Asteroid Mass: {(results.asteroid_params.mass_kg / 1e9).toFixed(2)} billion kg</div> */}
                     <div>Diameter: {results.asteroid_params.diameter_km} km</div>
-                    <div>Velocity: {results.asteroid_params.velocity_km_s} km/s</div>
-                    <div>Impact Angle: {results.asteroid_params.angle_degrees}°</div>
-                    <div>Location: {results.impact_location.latitude.toFixed(2)}°N, {results.impact_location.longitude.toFixed(2)}°E</div>
+                    <div>Velocity: {results.asteroid_params.velocity_km_s.toFixed(2)} km/s</div>
+                    <div>Impact Angle: {results.asteroid_params.angle_degrees.toFixed(2)}°</div>
+                    <div>Location: {results.impact_location.latitude.toFixed(6)}, {results.impact_location.longitude.toFixed(6)}</div>
                 </div>
             </div>
         </div>

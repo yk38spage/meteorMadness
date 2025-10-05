@@ -5,6 +5,7 @@ import ControlPanel from '../../components/ControlPanel/ControlPanel';
 import ResultsDashboard from '../../components/ResultsDashboard/ResultsDashboard';
 import { Loader2 } from 'lucide-react';
 import Button from '../../assets/Button/Button';
+import '../../components/ResultsDashboard/ResultsDashboard.css';
 
 
 const Homepage = () => {
@@ -17,7 +18,6 @@ const Homepage = () => {
         distance: 150, // in thousands of km
         latitude: 40.7,
         longitude: -74,
-        density_kg_m3: 3000,
         simulation_speed: 50
     });
     const [results, setResults] = useState(null);
@@ -26,7 +26,8 @@ const Homepage = () => {
     const [loadingAsteroids, setLoadingAsteroids] = useState(true);
     const [showAsteroid, setShowAsteroid] = useState(false);
     const [impactData, setImpactData] = useState(null);
-
+    const [showControlPanel, setShowControlPanel] = useState(true);
+    const [showResult, setShowResult] = useState(false);
     // Fetch asteroids on mount
     useEffect(() => {
         const loadAsteroids = async () => {
@@ -36,11 +37,11 @@ const Homepage = () => {
             } catch (error) {
                 console.error('Failed to load asteroids:', error);
                 // Fallback data if API fails
-                setAsteroids([
-                    { id: '1', name: 'Impactor-2025', diameter_km: 1.5, velocity_km_s: 25, is_potentially_hazardous: true },
-                    { id: '2', name: 'Apophis', diameter_km: 0.34, velocity_km_s: 30.7, is_potentially_hazardous: true },
-                    { id: '3', name: 'Bennu', diameter_km: 0.49, velocity_km_s: 28, is_potentially_hazardous: true },
-                ]);
+                // setAsteroids([
+                //     { id: '1', name: 'Impactor-2025', diameter_km: 1.5, velocity_km_s: 25, is_potentially_hazardous: true },
+                //     { id: '2', name: 'Apophis', diameter_km: 0.34, velocity_km_s: 30.7, is_potentially_hazardous: true },
+                //     { id: '3', name: 'Bennu', diameter_km: 0.49, velocity_km_s: 28, is_potentially_hazardous: true },
+                // ]);
             } finally {
                 setLoadingAsteroids(false);
             }
@@ -52,6 +53,8 @@ const Homepage = () => {
     const handleSimulate = async () => {
         setLoading(true);
         setShowAsteroid(true);
+        setShowControlPanel(false);
+        setShowResult(false);
         setMitigationResults(null);
         setResults(null); // Clear previous results
         setImpactData(null); // Clear previous impact data
@@ -63,6 +66,7 @@ const Homepage = () => {
 
     const handleOnImpact = async (data) => {
         setShowAsteroid(false);
+        setShowResult(true);
 
         if (data) {
             // Asteroid hit Earth
@@ -77,7 +81,7 @@ const Homepage = () => {
                     impact_latitude: data.location.latitude,
                     impact_longitude: data.location.longitude,
                     impact_angle: data.angle,
-                    impact_velocity_km_s: data.velocity
+                    velocity_km_s: data.velocity
                 };
 
                 const apiResults = await simulateImpact(apiParams);
@@ -139,16 +143,18 @@ const Homepage = () => {
     return (
         <div className="h-screen flex overflow-hidden bg-gray-900">
             {/* Left Panel - Controls */}
-            <div className="w-96 flex-shrink-0 border-r border-gray-800">
-                <ControlPanel
-                    asteroids={asteroids}
-                    params={params}
-                    setParams={setParams}
-                    onSimulate={handleSimulate}
-                    onMitigate={handleMitigate}
-                    loading={loading}
-                />
-            </div>
+
+            <ControlPanel
+                asteroids={asteroids}
+                params={params}
+                setParams={setParams}
+                onSimulate={handleSimulate}
+                onMitigate={handleMitigate}
+                loading={loading}
+                show={showControlPanel}
+            >
+                <Button type="button" priority="secondary" icon={showControlPanel ? 'fa-solid fa-angle-left' : 'fa-solid fa-bars'} onClick={() => setShowControlPanel(!showControlPanel)} title={showControlPanel ? 'Hide Control Panel' : 'Show Control Panel'} className={showControlPanel ? 'to-top' : ''} />
+            </ControlPanel>
 
             {/* Center Panel - 3D Visualization */}
             <div className="flex-1 relative">
@@ -193,7 +199,7 @@ const Homepage = () => {
                 </div>
 
                 {/* Impact Info Overlay */}
-                {impactData && (
+                {/* {impactData && (
                     <div className="absolute bottom-4 left-4 bg-red-900/80 backdrop-blur-sm rounded-lg p-3 text-white text-sm max-w-xs">
                         <div className="font-bold mb-1">⚠️ Impact Detected!</div>
                         <div className="text-xs">
@@ -202,7 +208,7 @@ const Homepage = () => {
                             • Impact Velocity: {impactData.velocity.toFixed(1)} km/s
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {/* Miss Info Overlay */}
                 {results?.impact_occurred === false && (
@@ -216,8 +222,8 @@ const Homepage = () => {
             </div>
 
             {/* Right Panel - Results */}
-            <div className="w-96 flex-shrink-0 border-l border-gray-800 bg-gray-900 overflow-y-auto">
-                <div className="p-4">
+            <div className="flex-shrink-0 results-container">
+                <div className={`p-4 results ${!showResult ? 'hidden' : ''}`}>
                     <h2 className="text-xl font-bold text-white mb-4">Impact Analysis</h2>
                     {results?.impact_occurred === false ? (
                         <div className="bg-green-900/30 border border-green-700 rounded-lg p-4 text-white">
@@ -234,6 +240,8 @@ const Homepage = () => {
                         />
                     )}
                 </div>
+                <Button type="button" priority="secondary" icon={!showResult ? 'fa-solid fa-square-poll-vertical' : 'fa-solid fa-angle-right'} onClick={() => setShowResult(!showResult)} title={showResult ? 'Hide Results' : 'Show Results'} className={showResult ? 'to-bottom' : ''} />
+
             </div>
         </div>
     );

@@ -199,7 +199,7 @@ function AsteroidApproach({ show, params, initialLocation, onImpact }) {
     };
 
     // Simulate trajectory
-    const simulate = (position0, velocity0, dt = 0.5, max_steps = 20000) => {
+    const simulate = (position0, velocity0, dt = 0.5, max_steps = 50000) => {
         let pos = position0.clone();
         let vel = velocity0.clone();
 
