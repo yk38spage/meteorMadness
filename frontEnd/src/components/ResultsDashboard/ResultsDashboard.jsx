@@ -103,6 +103,7 @@ export default function ResultsDashboard({ results }) {
             }
             case "gravity_tractor": {
                 // Assumptions from Lu/Love NASA studies: 20-ton (20,000 kg) spacecraft, 100m hover distance, 0.3 N thrust, 10-year mission
+                const G = 6.67 * Math.pow(10, -11);
                 const spacecraftMass = 20000; // kg
                 const hoverDistance = 100; // meters
                 const thrust = 0.3; // Newtons (solar-electric propulsion)

@@ -290,11 +290,11 @@ export default function ControlPanel({
                 </div>
 
                 {/* Simulate Button */}
-                {loading ? (
+                {/* {loading ? (
                     <Button type="button" priority="primary" icon="fa-solid fa-play" onClick={onSimulate} disabled><ButtonSpinner />Simulating...</Button>
                 ) : (
                     <Button type="button" priority="primary" icon="fa-solid fa-play" onClick={onSimulate}>Simulate Trajectory</Button>
-                )}
+                )} */}
 
                 {/* Mitigation Section */}
                 <div className="border-t border-gray-700 pt-4 space-y-3 flex flex-col gap-2">
@@ -304,12 +304,12 @@ export default function ControlPanel({
                     >
                         <Shield className="w-4 h-4" />
                         Mitigation Strategies
-                        <span className="text-xs ml-auto">{showMitigation ? '▼' : '▶'}</span>
+                        {/* <span className="text-xs ml-auto">{showMitigation ? '▼' : '▶'}</span> */}
                     </button>
 
                     {/* {showMitigation && ( */}
-                        <div className="space-y-3 pl-6 flex flex-col gap-2">
-                            {/* <div>
+                    <div className="space-y-3 pl-6 flex flex-col gap-2">
+                        {/* <div>
                                 <label className="text-xs text-gray-400 mb-1 block">
                                     Warning Time: {mitigationYears} years
                                 </label>
@@ -324,28 +324,35 @@ export default function ControlPanel({
                                 />
                             </div> */}
 
-                            <div>
-                                <label className="text-xs text-gray-400 mb-1 block">Method</label>
-                                <select
-                                    value={mitigationMethod}
-                                    onChange={(e) => setParams({...params, mitigation_method: e.target.value})}
-                                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-green-500"
-                                >
-                                    <option value="kinetic_impactor">Kinetic Impactor</option>
-                                    <option value="gravity_tractor">Gravity Tractor</option>
-                                </select>
-                            </div>
-
-                            <Button
-                                type="button"
-                                priority="primary"
-                                icon="fa-solid fa-shield-halved"
-                                onClick={onSimulate}
-                                disabled={loading}
+                        <div>
+                            <label className="text-xs text-gray-400 mb-1 block">Method</label>
+                            <select
+                                value={params.mitigation_method}
+                                onChange={(e) => setParams({ ...params, mitigation_method: e.target.value })}
+                                className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-green-500"
                             >
-                                {loading ? 'Evaluating...' : 'Evaluate Defense'}
-                            </Button>
+                                <option value="kinetic_impactor">Kinetic Impactor</option>
+                                <option value="gravity_tractor">Gravity Tractor</option>
+                            </select>
                         </div>
+
+                        {/* Simulate Button */}
+                        {loading ? (
+                            <Button type="button" priority="primary" icon="fa-solid fa-play" onClick={onSimulate} disabled><ButtonSpinner />Simulating...</Button>
+                        ) : (
+                            <Button type="button" priority="primary" icon="fa-solid fa-play" onClick={onSimulate}>Simulate Trajectory</Button>
+                        )}
+
+                        {/* <Button
+                            type="button"
+                            priority="primary"
+                            icon="fa-solid fa-shield-halved"
+                            onClick={onSimulate}
+                            disabled={loading}
+                        >
+                            {loading ? 'Evaluating...' : 'Evaluate Defense'}
+                        </Button> */}
+                    </div>
                     {/* )} */}
                 </div>
 

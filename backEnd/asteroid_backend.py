@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-NASA_API_KEY = os.getenv("uIHWZOg9PWP25PlpgspRfbGOqOmdUchgeTXGa1Va", "API_KEY")
+NASA_API_KEY = os.getenv("uIHWZOg9PWP25PlpgspRfbGOqOmdUchgeTXGa1Va", "uIHWZOg9PWP25PlpgspRfbGOqOmdUchgeTXGa1Va")
 NASA_BASE_URL = "https://api.nasa.gov/neo/rest/v1"
 
 # Request/Response modelleri
