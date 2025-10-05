@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Rocket, MapPin, Settings, Shield } from 'lucide-react';
 import Button from '../../assets/Button/Button';
-import BasicSpinner from '../../assets/Spinner/BasicSpinner';
+import ButtonSpinner from '../../assets/Spinner/ButtonSpinner';
 import './ControlPanel.css';
 
 export default function ControlPanel({
@@ -29,18 +29,31 @@ export default function ControlPanel({
                 horizontal_velocity_km_s: asteroid.horizontal_velocity_km_s,
                 vertical_velocity_km_s: asteroid.vertical_velocity_km_s,
                 z_velocity_km_s: asteroid.z_velocity_km_s,
-                distance: Math.round(asteroid.miss_distance_km / 10000)
+                distance: Math.round(asteroid.miss_distance_km / 10000),
+                mitigation_method: mitigationMethod
             });
         }
     };
 
     const handleMitigate = () => {
+        const velocityMagnitude = Math.sqrt(
+            params.horizontal_velocity_km_s ** 2 +
+            params.vertical_velocity_km_s ** 2 +
+            params.z_velocity_km_s ** 2
+        );
         onMitigate({
             diameter_km: params.diameter_km,
-            velocity_km_s: params.velocity_km_s,
+            velocity_km_s: params.velocity_km_s || velocityMagnitude,  // Fallback to magnitude
             years_before_impact: mitigationYears,
-            method: mitigationMethod
+            method: mitigationMethod,
+            latitude: params.latitude,
+            longitude: params.longitude,
+            distance: params.distance,
+            horizontal_velocity_km_s: params.horizontal_velocity_km_s,
+            vertical_velocity_km_s: params.vertical_velocity_km_s,
+            z_velocity_km_s: params.z_velocity_km_s
         });
+
     };
 
     return (
@@ -278,7 +291,7 @@ export default function ControlPanel({
 
                 {/* Simulate Button */}
                 {loading ? (
-                    <Button type="button" priority="primary" icon="fa-solid fa-play" onClick={onSimulate} disabled><BasicSpinner />Simulating...</Button>
+                    <Button type="button" priority="primary" icon="fa-solid fa-play" onClick={onSimulate} disabled><ButtonSpinner />Simulating...</Button>
                 ) : (
                     <Button type="button" priority="primary" icon="fa-solid fa-play" onClick={onSimulate}>Simulate Trajectory</Button>
                 )}
@@ -294,7 +307,7 @@ export default function ControlPanel({
                         <span className="text-xs ml-auto">{showMitigation ? '▼' : '▶'}</span>
                     </button>
 
-                    {showMitigation && (
+                    {/* {showMitigation && ( */}
                         <div className="space-y-3 pl-6 flex flex-col gap-2">
                             {/* <div>
                                 <label className="text-xs text-gray-400 mb-1 block">
@@ -315,7 +328,7 @@ export default function ControlPanel({
                                 <label className="text-xs text-gray-400 mb-1 block">Method</label>
                                 <select
                                     value={mitigationMethod}
-                                    onChange={(e) => setMitigationMethod(e.target.value)}
+                                    onChange={(e) => setParams({...params, mitigation_method: e.target.value})}
                                     className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-green-500"
                                 >
                                     <option value="kinetic_impactor">Kinetic Impactor</option>
@@ -327,13 +340,13 @@ export default function ControlPanel({
                                 type="button"
                                 priority="primary"
                                 icon="fa-solid fa-shield-halved"
-                                onClick={handleMitigate}
+                                onClick={onSimulate}
                                 disabled={loading}
                             >
                                 {loading ? 'Evaluating...' : 'Evaluate Defense'}
                             </Button>
                         </div>
-                    )}
+                    {/* )} */}
                 </div>
 
                 {/* Info Box */}

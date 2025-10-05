@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import EarthScene from '../../components/EarthScene/EarthScene';
 import { fetchAsteroids, simulateImpact, evaluateMitigation } from '../../fetch/api_service';
 import ControlPanel from '../../components/ControlPanel/ControlPanel';
@@ -6,7 +6,6 @@ import ResultsDashboard from '../../components/ResultsDashboard/ResultsDashboard
 import { Loader2 } from 'lucide-react';
 import Button from '../../assets/Button/Button';
 import '../../components/ResultsDashboard/ResultsDashboard.css';
-
 
 const Homepage = () => {
     const [asteroids, setAsteroids] = useState([]);
@@ -18,17 +17,17 @@ const Homepage = () => {
         distance: 150, // in thousands of km
         latitude: 40.7,
         longitude: -74,
-        simulation_speed: 50
+        simulation_speed: 50,
+        mitigation_method: 'kinetic_impactor'
     });
     const [results, setResults] = useState(null);
-    const [mitigationResults, setMitigationResults] = useState(null);
     const [loading, setLoading] = useState(false);
     const [loadingAsteroids, setLoadingAsteroids] = useState(true);
     const [showAsteroid, setShowAsteroid] = useState(false);
     const [impactData, setImpactData] = useState(null);
     const [showControlPanel, setShowControlPanel] = useState(true);
     const [showResult, setShowResult] = useState(false);
-    // Fetch asteroids on mount
+
     useEffect(() => {
         const loadAsteroids = async () => {
             try {
@@ -36,12 +35,6 @@ const Homepage = () => {
                 setAsteroids(data.asteroids || []);
             } catch (error) {
                 console.error('Failed to load asteroids:', error);
-                // Fallback data if API fails
-                // setAsteroids([
-                //     { id: '1', name: 'Impactor-2025', diameter_km: 1.5, velocity_km_s: 25, is_potentially_hazardous: true },
-                //     { id: '2', name: 'Apophis', diameter_km: 0.34, velocity_km_s: 30.7, is_potentially_hazardous: true },
-                //     { id: '3', name: 'Bennu', diameter_km: 0.49, velocity_km_s: 28, is_potentially_hazardous: true },
-                // ]);
             } finally {
                 setLoadingAsteroids(false);
             }
@@ -55,13 +48,9 @@ const Homepage = () => {
         setShowAsteroid(true);
         setShowControlPanel(false);
         setShowResult(false);
-        setMitigationResults(null);
-        setResults(null); // Clear previous results
-        setImpactData(null); // Clear previous impact data
-
-        // Note: The actual impact calculation now happens in the 3D simulation
-        // We'll wait for the onImpact callback to get the actual impact data
-        setLoading(false);
+        setResults(null);
+        setImpactData(null);
+        setLoading(false); // Let EarthScene handle loading state
     };
 
     const handleOnImpact = async (data) => {
@@ -72,18 +61,17 @@ const Homepage = () => {
             // Asteroid hit Earth
             setImpactData(data);
 
-            // Call the API with actual impact data
             setLoading(true);
             try {
                 const apiParams = {
                     ...params,
-                    // Use actual impact data
                     impact_latitude: data.location.latitude,
                     impact_longitude: data.location.longitude,
                     impact_angle: data.angle,
                     velocity_km_s: data.velocity
                 };
 
+                // Calculate impact effects
                 const apiResults = await simulateImpact(apiParams);
 
                 setResults({
@@ -91,17 +79,17 @@ const Homepage = () => {
                     impact_location: data.location,
                     impact_angle: data.angle,
                     impact_velocity: data.velocity,
-                    impact_occurred: true
+                    impact_occurred: true,
+                    mitigation_method: params.mitigation_method // Include mitigation method
                 });
             } catch (error) {
-                console.error('Simulation failed:', error);
-                // Still show basic impact data even if API fails
+                console.error('Simulation or mitigation failed:', error);
                 setResults({
                     impact_location: data.location,
                     impact_angle: data.angle,
                     impact_velocity: data.velocity,
                     impact_occurred: true,
-                    error: 'Failed to calculate detailed impact effects'
+                    error: 'Failed to calculate detailed impact effects or mitigation'
                 });
             } finally {
                 setLoading(false);
@@ -112,20 +100,6 @@ const Homepage = () => {
                 impact_occurred: false,
                 message: 'The asteroid missed Earth and continued into space.'
             });
-        }
-    };
-
-    const handleMitigate = async (mitigationParams) => {
-        setLoading(true);
-
-        try {
-            const data = await evaluateMitigation(mitigationParams);
-            setMitigationResults(data);
-        } catch (error) {
-            console.error('Mitigation evaluation failed:', error);
-            alert('Mitigation evaluation failed. Please try again.');
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -142,21 +116,24 @@ const Homepage = () => {
 
     return (
         <div className="h-screen flex overflow-hidden bg-gray-900">
-            {/* Left Panel - Controls */}
-
             <ControlPanel
                 asteroids={asteroids}
                 params={params}
                 setParams={setParams}
                 onSimulate={handleSimulate}
-                onMitigate={handleMitigate}
                 loading={loading}
                 show={showControlPanel}
             >
-                <Button type="button" priority="secondary" icon={showControlPanel ? 'fa-solid fa-angle-left' : 'fa-solid fa-bars'} onClick={() => setShowControlPanel(!showControlPanel)} title={showControlPanel ? 'Hide Control Panel' : 'Show Control Panel'} className={showControlPanel ? 'to-top' : ''} />
+                <Button
+                    type="button"
+                    priority="secondary"
+                    icon={showControlPanel ? 'fa-solid fa-angle-left' : 'fa-solid fa-bars'}
+                    onClick={() => setShowControlPanel(!showControlPanel)}
+                    title={showControlPanel ? 'Hide Control Panel' : 'Show Control Panel'}
+                    className={showControlPanel ? 'to-top' : ''}
+                />
             </ControlPanel>
 
-            {/* Center Panel - 3D Visualization */}
             <div className="flex-1 relative">
                 <EarthScene
                     impactPoint={impactData?.location}
@@ -167,7 +144,6 @@ const Homepage = () => {
                     onImpact={handleOnImpact}
                 />
 
-                {/* Loading Overlay */}
                 {loading && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <div className="bg-gray-800 rounded-lg p-6 text-white text-center">
@@ -179,7 +155,6 @@ const Homepage = () => {
                     </div>
                 )}
 
-                {/* Info Overlay */}
                 <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm rounded-lg p-3 text-white text-sm max-w-xs">
                     <div className="font-bold mb-1"><i className="fa-solid fa-earth-europe"></i> Interactive Earth</div>
                     <div className="text-xs text-gray-300">
@@ -198,19 +173,6 @@ const Homepage = () => {
                     </div>
                 </div>
 
-                {/* Impact Info Overlay */}
-                {/* {impactData && (
-                    <div className="absolute bottom-4 left-4 bg-red-900/80 backdrop-blur-sm rounded-lg p-3 text-white text-sm max-w-xs">
-                        <div className="font-bold mb-1">⚠️ Impact Detected!</div>
-                        <div className="text-xs">
-                            • Location: {impactData.location.latitude.toFixed(2)}°, {impactData.location.longitude.toFixed(2)}°<br />
-                            • Impact Angle: {impactData.angle.toFixed(1)}°<br />
-                            • Impact Velocity: {impactData.velocity.toFixed(1)} km/s
-                        </div>
-                    </div>
-                )} */}
-
-                {/* Miss Info Overlay */}
                 {results?.impact_occurred === false && (
                     <div className="absolute bottom-4 left-4 bg-green-900/80 backdrop-blur-sm rounded-lg p-3 text-white text-sm max-w-xs">
                         <div className="font-bold mb-1">✅ Earth is Safe!</div>
@@ -221,7 +183,6 @@ const Homepage = () => {
                 )}
             </div>
 
-            {/* Right Panel - Results */}
             <div className="flex-shrink-0 results-container">
                 <div className={`p-4 results ${!showResult ? 'hidden' : ''}`}>
                     <h2 className="text-xl font-bold text-white mb-4">Impact Analysis</h2>
@@ -246,16 +207,21 @@ const Homepage = () => {
 
                             <ResultsDashboard
                                 results={results}
-                                mitigationResults={mitigationResults}
                             />
                         </>
                     )}
                 </div>
-                <Button type="button" priority="secondary" icon={!showResult ? 'fa-solid fa-square-poll-vertical' : 'fa-solid fa-angle-right'} onClick={() => setShowResult(!showResult)} title={showResult ? 'Hide Results' : 'Show Results'} className={showResult ? 'to-bottom' : ''} />
-
+                <Button
+                    type="button"
+                    priority="secondary"
+                    icon={!showResult ? 'fa-solid fa-square-poll-vertical' : 'fa-solid fa-angle-right'}
+                    onClick={() => setShowResult(!showResult)}
+                    title={showResult ? 'Hide Results' : 'Show Results'}
+                    className={showResult ? 'to-bottom' : ''}
+                />
             </div>
         </div>
     );
-}
+};
 
-export default Homepage
+export default Homepage;
